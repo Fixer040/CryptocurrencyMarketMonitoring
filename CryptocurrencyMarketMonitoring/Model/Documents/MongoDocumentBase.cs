@@ -4,7 +4,7 @@ using System.Text;
 
 namespace CryptocurrencyMarketMonitoring.Model.Documents
 {
-    class MongoDocumentBase
+    public class MongoDocumentBase : IMongoDocumentBase
     {
     }
 }

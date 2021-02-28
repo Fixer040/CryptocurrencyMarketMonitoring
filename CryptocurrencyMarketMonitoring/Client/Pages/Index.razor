@@ -3,9 +3,17 @@
 <h1>Cryptocurrency prices today</h1>
 
 
-<SfGrid DataSource="@Cryptocurrencies">
+<SfGrid DataSource="@Cryptocurrencies" AllowSorting="true">
     <GridColumns>
-        <GridColumn Field=""
+        <GridColumn Field="@nameof(Cryptocurrency.CryptocurrencyId)" HeaderText="#" TextAlign="TextAlign.Center" />
+        <GridColumn Field="@nameof(Cryptocurrency.Name)" HeaderText="Name" TextAlign="TextAlign.Center" />
+        <GridColumn Field="@nameof(Cryptocurrency.PriceUSD)" HeaderText="Price" TextAlign="TextAlign.Center" Format="$0.00" />
+        <GridColumn Field="@nameof(Cryptocurrency.LastDayPercentageMovement)" HeaderText="24h" TextAlign="TextAlign.Center" Format="0.00%" />
+        <GridColumn Field="@nameof(Cryptocurrency.LastWeekPercentageMovement)" HeaderText="7d" TextAlign="TextAlign.Center" Format="0.00%"/>
+        <GridColumn Field="@nameof(Cryptocurrency.MarketCapUSD)" HeaderText="Market cap" TextAlign="TextAlign.Center" Format="$0" />
+        <GridColumn Field="@nameof(Cryptocurrency.VolumeUSD)" HeaderText="Volume" TextAlign="TextAlign.Center" Format="$0" />
+        <GridColumn Field="@nameof(Cryptocurrency.CirculatingSupply)" HeaderText="Circulating supply" TextAlign="TextAlign.Center" />
+
     </GridColumns>
 </SfGrid>
 
@@ -19,12 +27,24 @@
         base.OnInitialized();
 
         var currencies = new List<Cryptocurrency>();
-        for (int i =0; i < 10; i++)
+        var names = new List<string>() { "Bitcoin", "Ethereum", "Cardano", "Tether", "XRP", "Basic Attention Token", "Polkadot", "Chainlink", "Binance Coin", "Dogecoin" };
+        for (int i = 0; i < 10; i++)
         {
             var currency = new Cryptocurrency()
             {
-                Name
-            }
+                CryptocurrencyId = i + 1,
+                Name = names[i],
+                PriceUSD = new Random().Next(100, 10000) + new Random().NextDouble(),
+                LastDayPercentageMovement = new Random().NextDouble(),
+                LastWeekPercentageMovement = new Random().NextDouble(),
+                MarketCapUSD = new Random().Next(1000000, int.MaxValue),
+                VolumeUSD = new Random().Next(100000, int.MaxValue),
+                CirculatingSupply = new Random().Next(10000, int.MaxValue),
+            };
+
+            currencies.Add(currency);
+
+            Cryptocurrencies = currencies;
         }
 
     }
@@ -35,11 +55,12 @@
     {
         public int? CryptocurrencyId { get; set; }
         public string Name { get; set; }
-        public int PriceUSD { get; set; }
-        public float LastDayPercentageMovement { get; set; }
-        public float LastWeekPercentageMovement { get; set; }
+        public double PriceUSD { get; set; }
+        public double LastDayPercentageMovement { get; set; }
+        public double LastWeekPercentageMovement { get; set; }
         public int MarketCapUSD { get; set; }
         public int VolumeUSD { get; set; }
+        public int CirculatingSupply { get; set; }
 
     }
 }
