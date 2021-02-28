@@ -1,0 +1,45 @@
+﻿@page "/"
+
+<h1>Cryptocurrency prices today</h1>
+
+
+<SfGrid DataSource="@Cryptocurrencies">
+    <GridColumns>
+        <GridColumn Field=""
+    </GridColumns>
+</SfGrid>
+
+
+@code{
+    public List<Cryptocurrency> Cryptocurrencies { get; set; }
+
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        var currencies = new List<Cryptocurrency>();
+        for (int i =0; i < 10; i++)
+        {
+            var currency = new Cryptocurrency()
+            {
+                Name
+            }
+        }
+
+    }
+
+
+
+    public class Cryptocurrency
+    {
+        public int? CryptocurrencyId { get; set; }
+        public string Name { get; set; }
+        public int PriceUSD { get; set; }
+        public float LastDayPercentageMovement { get; set; }
+        public float LastWeekPercentageMovement { get; set; }
+        public int MarketCapUSD { get; set; }
+        public int VolumeUSD { get; set; }
+
+    }
+}

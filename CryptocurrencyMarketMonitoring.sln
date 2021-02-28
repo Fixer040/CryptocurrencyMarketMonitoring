@@ -1,0 +1,43 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31005.135
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CryptocurrencyMarketMonitoring.Server", "CryptocurrencyMarketMonitoring\Server\CryptocurrencyMarketMonitoring.Server.csproj", "{DF81B5D0-69EB-4D16-9ABC-E61A7B7F4040}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CryptocurrencyMarketMonitoring.Client", "CryptocurrencyMarketMonitoring\Client\CryptocurrencyMarketMonitoring.Client.csproj", "{B174B303-EEBD-4699-A2E7-C936214A9E78}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CryptocurrencyMarketMonitoring.Shared", "CryptocurrencyMarketMonitoring\Shared\CryptocurrencyMarketMonitoring.Shared.csproj", "{626ACDA8-B5DC-40BC-89F8-729B061490D2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryptocurrencyMarketMonitoring.Model", "CryptocurrencyMarketMonitoring\Model\CryptocurrencyMarketMonitoring.Model.csproj", "{EEDB0E97-E114-4F29-B447-152C55350B46}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DF81B5D0-69EB-4D16-9ABC-E61A7B7F4040}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DF81B5D0-69EB-4D16-9ABC-E61A7B7F4040}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DF81B5D0-69EB-4D16-9ABC-E61A7B7F4040}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DF81B5D0-69EB-4D16-9ABC-E61A7B7F4040}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B174B303-EEBD-4699-A2E7-C936214A9E78}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B174B303-EEBD-4699-A2E7-C936214A9E78}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B174B303-EEBD-4699-A2E7-C936214A9E78}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B174B303-EEBD-4699-A2E7-C936214A9E78}.Release|Any CPU.Build.0 = Release|Any CPU
+		{626ACDA8-B5DC-40BC-89F8-729B061490D2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{626ACDA8-B5DC-40BC-89F8-729B061490D2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{626ACDA8-B5DC-40BC-89F8-729B061490D2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{626ACDA8-B5DC-40BC-89F8-729B061490D2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EEDB0E97-E114-4F29-B447-152C55350B46}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EEDB0E97-E114-4F29-B447-152C55350B46}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EEDB0E97-E114-4F29-B447-152C55350B46}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EEDB0E97-E114-4F29-B447-152C55350B46}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {622FF155-FA57-4E44-8F52-19C3F1E7589F}
+	EndGlobalSection
+EndGlobal
