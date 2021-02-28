@@ -5,11 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MongoDB.Driver" Version="2.11.6" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Abstractions\CryptocurrencyMarketMonitoring.Abstractions.csproj" />
+    <ProjectReference Include="..\Model\CryptocurrencyMarketMonitoring.Model.csproj" />
     <ProjectReference Include="..\Shared\CryptocurrencyMarketMonitoring.Shared.csproj" />
   </ItemGroup>
 

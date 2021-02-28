@@ -9,7 +9,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CryptocurrencyMarketMonitor
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CryptocurrencyMarketMonitoring.Shared", "CryptocurrencyMarketMonitoring\Shared\CryptocurrencyMarketMonitoring.Shared.csproj", "{626ACDA8-B5DC-40BC-89F8-729B061490D2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryptocurrencyMarketMonitoring.Model", "CryptocurrencyMarketMonitoring\Model\CryptocurrencyMarketMonitoring.Model.csproj", "{EEDB0E97-E114-4F29-B447-152C55350B46}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CryptocurrencyMarketMonitoring.Model", "CryptocurrencyMarketMonitoring\Model\CryptocurrencyMarketMonitoring.Model.csproj", "{EEDB0E97-E114-4F29-B447-152C55350B46}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CryptocurrencyMarketMonitoring.WebAPI", "CryptocurrencyMarketMonitoring\WebAPI\CryptocurrencyMarketMonitoring.WebAPI.csproj", "{585F2A93-C25C-417B-9EFB-1102D760BE59}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{901E2E41-775F-4CB6-9CA7-57654729C72E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CryptocurrencyMarketMonitoring.Services", "CryptocurrencyMarketMonitoring\Services\CryptocurrencyMarketMonitoring.Services.csproj", "{00697E01-796F-4E52-9138-3FDFDFC47725}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryptocurrencyMarketMonitoring.Abstractions", "CryptocurrencyMarketMonitoring\Abstractions\CryptocurrencyMarketMonitoring.Abstractions.csproj", "{9C34D8D8-B00E-4A95-A75C-ADADFD63BBED}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +41,18 @@ Global
 		{EEDB0E97-E114-4F29-B447-152C55350B46}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EEDB0E97-E114-4F29-B447-152C55350B46}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EEDB0E97-E114-4F29-B447-152C55350B46}.Release|Any CPU.Build.0 = Release|Any CPU
+		{585F2A93-C25C-417B-9EFB-1102D760BE59}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{585F2A93-C25C-417B-9EFB-1102D760BE59}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{585F2A93-C25C-417B-9EFB-1102D760BE59}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{585F2A93-C25C-417B-9EFB-1102D760BE59}.Release|Any CPU.Build.0 = Release|Any CPU
+		{00697E01-796F-4E52-9138-3FDFDFC47725}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{00697E01-796F-4E52-9138-3FDFDFC47725}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{00697E01-796F-4E52-9138-3FDFDFC47725}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{00697E01-796F-4E52-9138-3FDFDFC47725}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9C34D8D8-B00E-4A95-A75C-ADADFD63BBED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9C34D8D8-B00E-4A95-A75C-ADADFD63BBED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9C34D8D8-B00E-4A95-A75C-ADADFD63BBED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9C34D8D8-B00E-4A95-A75C-ADADFD63BBED}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
