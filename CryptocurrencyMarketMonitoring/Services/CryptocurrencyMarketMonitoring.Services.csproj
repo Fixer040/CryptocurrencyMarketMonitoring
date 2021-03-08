@@ -5,8 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Model\CryptocurrencyMarketMonitoring.Model.csproj" />
-    <ProjectReference Include="..\Shared\CryptocurrencyMarketMonitoring.Shared.csproj" />
+    <ProjectReference Include="..\Abstractions\CryptocurrencyMarketMonitoring.Abstractions.csproj" />
   </ItemGroup>
 
 </Project>

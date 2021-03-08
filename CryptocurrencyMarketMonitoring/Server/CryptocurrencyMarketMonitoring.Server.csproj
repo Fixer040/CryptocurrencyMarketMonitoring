@@ -10,9 +10,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Abstractions\CryptocurrencyMarketMonitoring.Abstractions.csproj" />
     <ProjectReference Include="..\Client\CryptocurrencyMarketMonitoring.Client.csproj" />
-    <ProjectReference Include="..\Shared\CryptocurrencyMarketMonitoring.Shared.csproj" />
-    <ProjectReference Include="..\WebAPI\CryptocurrencyMarketMonitoring.WebAPI.csproj" />
   </ItemGroup>
 
 

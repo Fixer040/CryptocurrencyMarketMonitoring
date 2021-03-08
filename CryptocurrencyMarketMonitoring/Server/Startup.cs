@@ -1,3 +1,6 @@
+using Autofac;
+using Autofac.Extensions.DependencyInjection;
+using CryptocurrencyMarketMonitoring.Abstractions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -5,31 +8,58 @@ using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using System;
 using System.Linq;
+using System.Reflection;
+using System.Runtime.Loader;
 
 namespace CryptocurrencyMarketMonitoring.Server
 {
-    public class Startup
+    public class Startup : DIContainerConfigurator
     {
-        public Startup(IConfiguration configuration)
+        public Startup(IHostEnvironment env) : base(env)
         {
-            Configuration = configuration;
+            var builder = new ConfigurationBuilder()
+                .SetBasePath(env.ContentRootPath)
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
+                .AddEnvironmentVariables();
+
+            Configuration = builder.Build();
         }
 
-        public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
-        public void ConfigureServices(IServiceCollection services)
+        public override void ConfigureServices(IServiceCollection services)
         {
 
             services.AddControllersWithViews();
             services.AddRazorPages();
+
+
+            services.AddControllerModules(Configuration, ContentRootPath);
+            //TODO: Dynamic loading from appsettings
+            //var sampleAssembly = AssemblyLoadContext.Default.LoadFromAssemblyPath($"{AppDomain.CurrentDomain.BaseDirectory}\\CryptocurrencyMarketMonitoring.WebAPI.dll");
+            //services
+            //    .AddControllers()
+            //    .AddApplicationPart(sampleAssembly)
+            //    .AddControllersAsServices();
+        }
+
+        public void ConfigureContainer(ContainerBuilder builder)
+        {
+            // Register your own things directly with Autofac here. Don't
+            // call builder.Populate(), that happens in AutofacServiceProviderFactory
+            // for you.
+            //builder.RegisterModule(new MyApplicationModule());
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public override void Configure(IApplicationBuilder app, IHostEnvironment env, ILoggerFactory loggerFactory)
         {
+            Container = app.ApplicationServices.GetAutofacRoot();
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
