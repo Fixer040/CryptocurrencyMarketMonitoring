@@ -8,4 +8,10 @@
     <ProjectReference Include="..\Abstractions\CryptocurrencyMarketMonitoring.Abstractions.csproj" />
   </ItemGroup>
 
+
+  <Target Name="PostcompileScript" AfterTargets="Build">
+    <Exec Command="if not exist ..\..\lib md ..\..\lib" />
+    <Exec Command="copy &quot;$(TargetPath)&quot; ..\..\lib\$(TargetFileName) /Y" />
+  </Target>
+  
 </Project>

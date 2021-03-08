@@ -14,5 +14,10 @@
     <ProjectReference Include="..\Client\CryptocurrencyMarketMonitoring.Client.csproj" />
   </ItemGroup>
 
+  <Target Name="PrecompileScript" BeforeTargets="Build">
+    <Exec Command="if not exist ..\..\lib md ..\..\lib" />
+    <Exec Command="copy /Y ..\..\lib\*.* &quot;$(TargetDir)&quot;" />
+  </Target>
+
 
 </Project>

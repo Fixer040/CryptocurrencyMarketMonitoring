@@ -54,6 +54,8 @@ namespace CryptocurrencyMarketMonitoring.Server
             // call builder.Populate(), that happens in AutofacServiceProviderFactory
             // for you.
             //builder.RegisterModule(new MyApplicationModule());
+
+            builder.RegisterAutofacModules(Configuration, ContentRootPath);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

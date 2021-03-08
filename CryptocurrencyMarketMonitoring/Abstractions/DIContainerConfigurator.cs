@@ -23,7 +23,6 @@ namespace CryptocurrencyMarketMonitoring.Abstractions
         public IServiceProvider Provider { get; protected set; }
         public IServiceCollection Services { get; protected set; }
         public IConfigurationRoot Configuration { get { return _configuration; } set { _configuration = value; DIContainer.Configuration = _configuration; } }
-        public List<Type> CommandTypes { get; set; } = new List<Type>();
         public void SetContentRootPath(string path)
         {
             ContentRootPath = path;
