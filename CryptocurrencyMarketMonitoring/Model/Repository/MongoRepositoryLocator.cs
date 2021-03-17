@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace CryptocurrencyMarketMonitoring.Model.Repository
 {
-    public class MongoRepositoryLocatorBase : IMongoRepositoryLocator
+    public class MongoRepositoryLocator : IMongoRepositoryLocator
     {
 
         public bool Any<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : IMongoDocumentBase

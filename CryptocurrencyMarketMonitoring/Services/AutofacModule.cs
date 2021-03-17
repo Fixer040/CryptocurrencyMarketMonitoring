@@ -1,18 +1,18 @@
 ﻿using Autofac;
-using CryptocurrencyMarketMonitoring.Model.Repository;
+using CryptocurrencyMarketMonitoring.Abstractions.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CryptocurrencyMarketMonitoring.Model
+namespace CryptocurrencyMarketMonitoring.Services
 {
     public class AutofacModule : Module
     {
         protected override void Load(ContainerBuilder builder)
         {
-            builder.RegisterType<MongoRepositoryLocator>().As<IMongoRepositoryLocator>();
+            builder.RegisterType<CryptocurrencyOverviewService>().As<ICryptocurrencyOverviewService>();
         }
     }
 }

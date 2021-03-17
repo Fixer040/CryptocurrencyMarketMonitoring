@@ -1,66 +1,68 @@
 ﻿@page "/"
+@using CryptocurrencyMarketMonitoring.Shared
+@using System.Collections.ObjectModel
+@using Syncfusion.Blazor.Grids
+@using System.ComponentModel
+@inject HttpClient Http
 
-<h1>Cryptocurrency prices today</h1>
+<div class="text-center justify-content-center">
+    <h1>Cryptocurrency prices today</h1>
 
 
-<SfGrid DataSource="@Cryptocurrencies" AllowSorting="true">
-    <GridColumns>
-        <GridColumn Field="@nameof(Cryptocurrency.CryptocurrencyId)" HeaderText="#" TextAlign="TextAlign.Center" />
-        <GridColumn Field="@nameof(Cryptocurrency.Name)" HeaderText="Name" TextAlign="TextAlign.Center" />
-        <GridColumn Field="@nameof(Cryptocurrency.PriceUSD)" HeaderText="Price" TextAlign="TextAlign.Center" Format="$0.00" />
-        <GridColumn Field="@nameof(Cryptocurrency.LastDayPercentageMovement)" HeaderText="24h" TextAlign="TextAlign.Center" Format="0.00%" />
-        <GridColumn Field="@nameof(Cryptocurrency.LastWeekPercentageMovement)" HeaderText="7d" TextAlign="TextAlign.Center" Format="0.00%"/>
-        <GridColumn Field="@nameof(Cryptocurrency.MarketCapUSD)" HeaderText="Market cap" TextAlign="TextAlign.Center" Format="$0" />
-        <GridColumn Field="@nameof(Cryptocurrency.VolumeUSD)" HeaderText="Volume" TextAlign="TextAlign.Center" Format="$0" />
-        <GridColumn Field="@nameof(Cryptocurrency.CirculatingSupply)" HeaderText="Circulating supply" TextAlign="TextAlign.Center" />
 
-    </GridColumns>
-</SfGrid>
+    <SfGrid DataSource="@Cryptocurrencies" AllowSorting="true">
+        <GridColumns>
+            <GridColumn Field="@nameof(Cryptocurrency.CryptocurrencyId)" HeaderText="#" TextAlign="TextAlign.Center" />
+            <GridColumn Field="@nameof(Cryptocurrency.Name)" HeaderText="Name" TextAlign="TextAlign.Center" />
+            <GridColumn Field="@nameof(Cryptocurrency.PriceUSD)" HeaderText="Price" TextAlign="TextAlign.Center" Format="$0.00" />
+            <GridColumn Field="@nameof(Cryptocurrency.LastDayPercentageMovement)" HeaderText="24h" TextAlign="TextAlign.Center" Format="0.00%" />
+            <GridColumn Field="@nameof(Cryptocurrency.LastWeekPercentageMovement)" HeaderText="7d" TextAlign="TextAlign.Center" Format="0.00%" />
+            <GridColumn Field="@nameof(Cryptocurrency.MarketCapUSD)" HeaderText="Market cap" TextAlign="TextAlign.Center" Format="$0" />
+            <GridColumn Field="@nameof(Cryptocurrency.VolumeUSD)" HeaderText="Volume" TextAlign="TextAlign.Center" Format="$0" />
+            <GridColumn Field="@nameof(Cryptocurrency.CirculatingSupply)" HeaderText="Circulating supply" TextAlign="TextAlign.Center" />
 
+        </GridColumns>
+    </SfGrid>
+</div>
 
 @code{
-    public List<Cryptocurrency> Cryptocurrencies { get; set; }
+    public ObservableCollection<Cryptocurrency> Cryptocurrencies { get; set; }
 
-
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         base.OnInitialized();
 
-        var currencies = new List<Cryptocurrency>();
-        var names = new List<string>() { "Bitcoin", "Ethereum", "Cardano", "Tether", "XRP", "Basic Attention Token", "Polkadot", "Chainlink", "Binance Coin", "Dogecoin" };
-        for (int i = 0; i < 10; i++)
+        var cryptocurrencyList = await Http.GetFromJsonAsync<Cryptocurrency[]>("CryptocurrencyOverview/list");
+
+        Cryptocurrencies = new ObservableCollection<Cryptocurrency>(cryptocurrencyList);
+
+
+
+        _ = Task.Run(async () =>
         {
-            var currency = new Cryptocurrency()
+            while (true)
             {
-                CryptocurrencyId = i + 1,
-                Name = names[i],
-                PriceUSD = new Random().Next(100, 10000) + new Random().NextDouble(),
-                LastDayPercentageMovement = new Random().NextDouble(),
-                LastWeekPercentageMovement = new Random().NextDouble(),
-                MarketCapUSD = new Random().Next(1000000, int.MaxValue),
-                VolumeUSD = new Random().Next(100000, int.MaxValue),
-                CirculatingSupply = new Random().Next(10000, int.MaxValue),
-            };
+                await Task.Delay(60000);
+                cryptocurrencyList = await Http.GetFromJsonAsync<Cryptocurrency[]>("CryptocurrencyOverview/list");
 
-            currencies.Add(currency);
+                foreach (var cryptocurrency in cryptocurrencyList)
+                {
+                    var observableCryptocurrency = Cryptocurrencies.First(x => x.Ticker == cryptocurrency.Ticker);
 
-            Cryptocurrencies = currencies;
-        }
+                    observableCryptocurrency.LastDayPercentageMovement = cryptocurrency.LastDayPercentageMovement;
+                    observableCryptocurrency.LastWeekPercentageMovement = cryptocurrency.LastWeekPercentageMovement;
+                    observableCryptocurrency.MarketCapUSD = cryptocurrency.MarketCapUSD;
+                    observableCryptocurrency.PriceUSD = cryptocurrency.PriceUSD;
+                    observableCryptocurrency.VolumeUSD = cryptocurrency.VolumeUSD;
+                }
+            }
 
-    }
+        });
 
-
-
-    public class Cryptocurrency
-    {
-        public int? CryptocurrencyId { get; set; }
-        public string Name { get; set; }
-        public double PriceUSD { get; set; }
-        public double LastDayPercentageMovement { get; set; }
-        public double LastWeekPercentageMovement { get; set; }
-        public int MarketCapUSD { get; set; }
-        public int VolumeUSD { get; set; }
-        public int CirculatingSupply { get; set; }
 
     }
+
+
+
+
 }
