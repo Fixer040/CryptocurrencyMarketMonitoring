@@ -1,4 +1,9 @@
 ﻿using Autofac;
+using Binance.Net;
+using Binance.Net.Interfaces;
+using CoinGecko.Clients;
+using CoinGecko.Interfaces;
+using CryptocurrencyMarketMonitoring.Abstractions.Managers;
 using CryptocurrencyMarketMonitoring.Abstractions.Services;
 using System;
 using System.Collections.Generic;
@@ -13,6 +18,9 @@ namespace CryptocurrencyMarketMonitoring.Services
         protected override void Load(ContainerBuilder builder)
         {
             builder.RegisterType<CryptocurrencyOverviewService>().As<ICryptocurrencyOverviewService>();
+            builder.RegisterType<CryptocurrencyOverviewManager>().As<ICryptocurrencyOverviewManager>().SingleInstance();
+            builder.RegisterType<CoinGeckoClient>().As<ICoinGeckoClient>();
+            builder.RegisterType<BinanceClient>().As<IBinanceClient>().SingleInstance();
         }
     }
 }

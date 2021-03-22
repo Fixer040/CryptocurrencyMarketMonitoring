@@ -12,6 +12,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Abstractions\CryptocurrencyMarketMonitoring.Abstractions.csproj" />
     <ProjectReference Include="..\Client\CryptocurrencyMarketMonitoring.Client.csproj" />
+    <ProjectReference Include="..\SignalR\CryptocurrencyMarketMonitoring.SignalR.csproj" />
   </ItemGroup>
 
   <Target Name="PrecompileScript" BeforeTargets="Build">

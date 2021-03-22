@@ -9,6 +9,6 @@ namespace CryptocurrencyMarketMonitoring.Abstractions.Services
 {
     public interface ICryptocurrencyOverviewService
     {
-        Task<IEnumerable<Cryptocurrency>> GetCryptocurrencyListAsync();
+        Task<IEnumerable<CryptocurrencyOverviewDto>> GetCryptocurrencyListAsync();
     }
 }

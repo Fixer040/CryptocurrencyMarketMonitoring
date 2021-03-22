@@ -7,6 +7,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Abstractions\CryptocurrencyMarketMonitoring.Abstractions.csproj" />
     <ProjectReference Include="..\Model.Documents\CryptocurrencyMarketMonitoring.Model.Documents.csproj" />
+    <ProjectReference Include="..\SignalR\CryptocurrencyMarketMonitoring.SignalR.csproj" />
   </ItemGroup>
 
 

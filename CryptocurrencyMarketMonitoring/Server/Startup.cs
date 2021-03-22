@@ -1,6 +1,7 @@
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using CryptocurrencyMarketMonitoring.Abstractions;
+using CryptocurrencyMarketMonitoring.SignalR.Hubs;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -37,15 +38,22 @@ namespace CryptocurrencyMarketMonitoring.Server
 
             services.AddControllersWithViews();
             services.AddRazorPages();
+            services.AddSignalR()
+                .AddJsonProtocol(options =>
+                {
+                    options.PayloadSerializerOptions.PropertyNamingPolicy = null;
+                });
 
 
             services.AddControllerModules(Configuration, ContentRootPath);
-            //TODO: Dynamic loading from appsettings
-            //var sampleAssembly = AssemblyLoadContext.Default.LoadFromAssemblyPath($"{AppDomain.CurrentDomain.BaseDirectory}\\CryptocurrencyMarketMonitoring.WebAPI.dll");
-            //services
-            //    .AddControllers()
-            //    .AddApplicationPart(sampleAssembly)
-            //    .AddControllersAsServices();
+            services.ConfigureBinanceClientSettings();
+
+            services.AddResponseCompression(opts =>
+            {
+                opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
+                    new[] { "application/octet-stream" });
+            });
+
         }
 
         public void ConfigureContainer(ContainerBuilder builder)
@@ -56,12 +64,16 @@ namespace CryptocurrencyMarketMonitoring.Server
             //builder.RegisterModule(new MyApplicationModule());
 
             builder.RegisterAutofacModules(Configuration, ContentRootPath);
+            //builder.RegisterSignalRHubs();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public override void Configure(IApplicationBuilder app, IHostEnvironment env, ILoggerFactory loggerFactory)
         {
             Container = app.ApplicationServices.GetAutofacRoot();
+
+            app.UseResponseCompression();
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -80,11 +92,13 @@ namespace CryptocurrencyMarketMonitoring.Server
 
             app.UseRouting();
 
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapRazorPages();
                 endpoints.MapControllers();
                 endpoints.MapFallbackToFile("index.html");
+                endpoints.MapHub<CryptocurrencyOverviewUpdateHub>("/overview-update");
             });
         }
     }

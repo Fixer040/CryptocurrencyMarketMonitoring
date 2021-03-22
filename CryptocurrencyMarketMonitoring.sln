@@ -19,7 +19,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CryptocurrencyMarketMonitor
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CryptocurrencyMarketMonitoring.Abstractions", "CryptocurrencyMarketMonitoring\Abstractions\CryptocurrencyMarketMonitoring.Abstractions.csproj", "{9C34D8D8-B00E-4A95-A75C-ADADFD63BBED}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryptocurrencyMarketMonitoring.Model.Documents", "CryptocurrencyMarketMonitoring\Model.Documents\CryptocurrencyMarketMonitoring.Model.Documents.csproj", "{E2349DC4-6429-4375-BD72-ED36C8FB5485}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CryptocurrencyMarketMonitoring.Model.Documents", "CryptocurrencyMarketMonitoring\Model.Documents\CryptocurrencyMarketMonitoring.Model.Documents.csproj", "{E2349DC4-6429-4375-BD72-ED36C8FB5485}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryptocurrencyMarketMonitoring.SignalR", "CryptocurrencyMarketMonitoring\SignalR\CryptocurrencyMarketMonitoring.SignalR.csproj", "{ABFEF153-4071-4B92-A9B7-3ED5F335D01D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -59,6 +61,10 @@ Global
 		{E2349DC4-6429-4375-BD72-ED36C8FB5485}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E2349DC4-6429-4375-BD72-ED36C8FB5485}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E2349DC4-6429-4375-BD72-ED36C8FB5485}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ABFEF153-4071-4B92-A9B7-3ED5F335D01D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ABFEF153-4071-4B92-A9B7-3ED5F335D01D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ABFEF153-4071-4B92-A9B7-3ED5F335D01D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ABFEF153-4071-4B92-A9B7-3ED5F335D01D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
