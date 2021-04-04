@@ -15,8 +15,9 @@ namespace CryptocurrencyMarketMonitoring.Shared
 
     public enum CryptocurrencyOverviewUpdateType
     {
-        Update = 0,
-        Create = 1,
-        Delete = 2
+        None = 0,
+        Update = 1,
+        Create = 2,
+        Delete = 3
     }
 }

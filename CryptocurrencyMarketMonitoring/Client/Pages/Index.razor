@@ -17,12 +17,11 @@
 
 @inject HttpClient Http
 
+
 <div class="text-center justify-content-center">
-    <h1>Top 100 cryptocurrency prices today</h1>
+    <h1 class="text-capitalize text-dark">Top 100 cryptocurrency prices today</h1>
 
-
-
-    <SfGrid @ref="Grid" DataSource="@Cryptocurrencies" AllowSorting="true">
+    <SfGrid @ref="Grid" DataSource="@Cryptocurrencies" AllowSorting="true" >
         <GridSortSettings>
             <GridSortColumns>
                 <GridSortColumn Field="@nameof(CryptocurrencyOverviewDto.Ranking)" Direction="SortDirection.Ascending"></GridSortColumn>
@@ -34,16 +33,26 @@
                 <Template>
                     @{
                         var employee = (context as CryptocurrencyOverviewDto);
-                        <div width="35" height="35" class="image">
+                        <div class="image">
                             <img width="30" height="30" src="@employee.IconSrc" />
                         </div>
                     }
                 </Template>
             </GridColumn>
             <GridColumn Field="@nameof(CryptocurrencyOverviewDto.Name)" HeaderText="Name" TextAlign="TextAlign.Center" />
-            <GridColumn Field="@nameof(CryptocurrencyOverviewDto.Ticker)" HeaderText="Symbol" TextAlign="TextAlign.Center" />
+            <GridColumn Field="@nameof(CryptocurrencyOverviewDto.Ticker)" HeaderText="Symbol" TextAlign="TextAlign.Center">
+                <Template>
+                    @{
+                        var ticker = ((CryptocurrencyOverviewDto)context).Ticker;
+                        var link = $"/detail/{ticker}";
+                        <div>
+                            <NavLink href="@link">@ticker</NavLink>
+                        </div>
+                    }
+                </Template>
+            </GridColumn>
             <GridColumn Field="@nameof(CryptocurrencyOverviewDto.PriceUSD)" HeaderText="Price" TextAlign="TextAlign.Center" Format="$0.00" />
-            <GridColumn HeaderText="24h" TextAlign="TextAlign.Center">
+            <GridColumn Field="@nameof(CryptocurrencyOverviewDto.LastDayPercentageMovement)" HeaderText="24h" TextAlign="TextAlign.Center">
                 <Template>
                     @{
                         <div class="@(((CryptocurrencyOverviewDto)context).LastDayPercentageMovement < 0 ? "text-danger" : "text-success")">
@@ -52,7 +61,7 @@
                     }
                 </Template>
             </GridColumn>
-            <GridColumn HeaderText="7d" TextAlign="TextAlign.Center">
+            <GridColumn Field="@nameof(CryptocurrencyOverviewDto.LastWeekPercentageMovement)" HeaderText="7d" TextAlign="TextAlign.Center">
                 <Template>
                     @{
                         <div class="@(((CryptocurrencyOverviewDto)context).LastWeekPercentageMovement < 0 ? "text-danger" : "text-success")">
@@ -87,9 +96,9 @@
 
 
 
-        _updateHubConnection.On<IEnumerable<CryptocurrencyOverviewDto>>("SendUpdateAsync", (updatedCryptocurrencyList) =>
+        _updateHubConnection.On<IEnumerable<CryptocurrencyOverviewUpdateDto>>("SendUpdateAsync", (cryptocurrencyListUpdates) =>
         {
-            DoGridUpdate(updatedCryptocurrencyList);
+            DoGridUpdate(cryptocurrencyListUpdates);
         });
 
         await _updateHubConnection.StartAsync();
@@ -102,47 +111,48 @@
         await _updateHubConnection.DisposeAsync();
     }
 
-    private void DoGridUpdate(IEnumerable<CryptocurrencyOverviewDto> updatedCryptocurrencyList)
+    private void DoGridUpdate(IEnumerable<CryptocurrencyOverviewUpdateDto> cryptocurrencyListUpdates)
     {
-        var removedCryptocurrencies = Cryptocurrencies.Where(x => !updatedCryptocurrencyList.Select(y => y.Ticker).Contains(x.Ticker));
-
-        foreach (var removedCryptocurrency in removedCryptocurrencies)
+        foreach (var update in cryptocurrencyListUpdates)
         {
-            Cryptocurrencies.Remove(removedCryptocurrency);
-        }
-
-        foreach (var cryptocurrency in updatedCryptocurrencyList)
-        {
-            var observableCryptocurrency = Cryptocurrencies.FirstOrDefault(x => x.Ticker == cryptocurrency.Ticker);
-
-            if (observableCryptocurrency == null)
+            switch (update.UpdateType)
             {
-                Cryptocurrencies.Add(cryptocurrency);
-            }
-            else
-            {
-                if (observableCryptocurrency.Ranking != cryptocurrency.Ranking)
-                    observableCryptocurrency.Ranking = cryptocurrency.Ranking;
-
-                if (observableCryptocurrency.LastDayPercentageMovement != cryptocurrency.LastDayPercentageMovement)
-                    observableCryptocurrency.LastDayPercentageMovement = cryptocurrency.LastDayPercentageMovement;
-
-                if (observableCryptocurrency.LastWeekPercentageMovement != cryptocurrency.LastWeekPercentageMovement)
-                    observableCryptocurrency.LastWeekPercentageMovement = cryptocurrency.LastWeekPercentageMovement;
-
-                if (observableCryptocurrency.MarketCapUSD != cryptocurrency.MarketCapUSD)
-                    observableCryptocurrency.MarketCapUSD = cryptocurrency.MarketCapUSD;
-
-                if (observableCryptocurrency.PriceUSD != cryptocurrency.PriceUSD)
-                    observableCryptocurrency.PriceUSD = cryptocurrency.PriceUSD;
-
-                if (observableCryptocurrency.VolumeUSD != cryptocurrency.VolumeUSD)
-                    observableCryptocurrency.VolumeUSD = cryptocurrency.VolumeUSD;
-
+                case CryptocurrencyOverviewUpdateType.Create:
+                    Cryptocurrencies.Add(update.Data);
+                    break;
+                case CryptocurrencyOverviewUpdateType.Delete:
+                    Cryptocurrencies.Remove(Cryptocurrencies.FirstOrDefault(x => x.Ticker == update.Data.Ticker));
+                    break;
+                case CryptocurrencyOverviewUpdateType.Update:
+                    UpdateCryptocurrencyOverviewData(Cryptocurrencies.FirstOrDefault(x => x.Ticker == update.Data.Ticker), update);
+                    break;
+                default:
+                    continue;
             }
         }
 
         Grid.Refresh();
+    }
+
+    private void UpdateCryptocurrencyOverviewData(CryptocurrencyOverviewDto overview, CryptocurrencyOverviewUpdateDto update)
+    {
+        if (overview.Ranking != update.Data.Ranking)
+            overview.Ranking = update.Data.Ranking;
+
+        if (overview.LastDayPercentageMovement != update.Data.LastDayPercentageMovement)
+            overview.LastDayPercentageMovement = update.Data.LastDayPercentageMovement;
+
+        if (overview.LastWeekPercentageMovement != update.Data.LastWeekPercentageMovement)
+            overview.LastWeekPercentageMovement = update.Data.LastWeekPercentageMovement;
+
+        if (overview.MarketCapUSD != update.Data.MarketCapUSD)
+            overview.MarketCapUSD = update.Data.MarketCapUSD;
+
+        if (overview.PriceUSD != update.Data.PriceUSD)
+            overview.PriceUSD = update.Data.PriceUSD;
+
+        if (overview.VolumeUSD != update.Data.VolumeUSD)
+            overview.VolumeUSD = update.Data.VolumeUSD;
     }
 
     private HubConnection _updateHubConnection;

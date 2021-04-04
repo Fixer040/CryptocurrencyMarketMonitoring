@@ -9,6 +9,6 @@ namespace CryptocurrencyMarketMonitoring.SignalR.Hubs
 {
     public interface ICryptocurrencyOverviewUpdateHub
     {
-        Task SendUpdateAsync(IEnumerable<CryptocurrencyOverviewDto> cryptocurrencyUpdates);
+        Task SendUpdateAsync(IEnumerable<CryptocurrencyOverviewUpdateDto> cryptocurrencyUpdates);
     }
 }

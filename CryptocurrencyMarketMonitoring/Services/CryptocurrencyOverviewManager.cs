@@ -47,7 +47,6 @@ namespace CryptocurrencyMarketMonitoring.Services
             _waitHandle.Set();
 
             _ = Task.Run(DoUpdateCycleAsync);
-
         }
 
         private async Task DoUpdateCycleAsync()
@@ -88,49 +87,66 @@ namespace CryptocurrencyMarketMonitoring.Services
                 newValues.Add(cryptocurrency);
             }
 
-            await _updateHub.Clients.All.SendUpdateAsync(_currentCryptocurrencyOverviewData.Values.ToList());
+            var updates = GetCryptocurrencyOverviewUpdates(oldValues, newValues);
+            await _updateHub.Clients.All.SendUpdateAsync(updates);
 
         }
 
-        //private IEnumerable<CryptocurrencyOverviewUpdateDto> GetCryptocurrencyOverviewUpdates(IEnumerable<CryptocurrencyOverviewDto> oldValues, IEnumerable<CryptocurrencyOverviewDto> newValues)
-        //{
+        private IEnumerable<CryptocurrencyOverviewUpdateDto> GetCryptocurrencyOverviewUpdates(IEnumerable<CryptocurrencyOverviewDto> oldValues, IEnumerable<CryptocurrencyOverviewDto> newValues)
+        {
+            var updates = new List<CryptocurrencyOverviewUpdateDto>();
+            foreach (var oldValue in oldValues)
+            {
+                var matchingNewValue = newValues.FirstOrDefault(x => x.Ticker == oldValue.Ticker);
 
-        //    foreach (var oldValue in oldValues)
-        //    {
-        //        var matchingNewValue = newValues.FirstOrDefault(x => x.Ticker == oldValue.Ticker);
+                var update = new CryptocurrencyOverviewUpdateDto();
+                if (matchingNewValue != null)
+                {
+                    var compareLogic = new CompareLogic();
+                    var comparisonResult = compareLogic.Compare(oldValue, matchingNewValue);
 
-        //        var update = new CryptocurrencyOverviewUpdateDto();
-        //        if (matchingNewValue != null)
-        //        {
+                    if (!comparisonResult.AreEqual)
+                    {
+                        update.UpdateType = CryptocurrencyOverviewUpdateType.None;
+                    }
+                    else
+                    {
+                        update.UpdateType = CryptocurrencyOverviewUpdateType.Update;
+                        update.Data = matchingNewValue;
+                    }
+                }
+                else
+                {
+                    update.UpdateType = CryptocurrencyOverviewUpdateType.Delete;
+                    update.Data = oldValue;
+                }
 
-        //        }
-        //        else
-        //        {
-        //            update.UpdateType = CryptocurrencyOverviewUpdateType.Delete;
-        //            update.Data = oldValue;
-        //        }
+                if (update.UpdateType != CryptocurrencyOverviewUpdateType.None)
+                    updates.Add(update);
+            }
 
-        //    }
+            var completelyNewValues = newValues.Where(x => !oldValues.Any(y => y.Ticker == x.Ticker));
 
-        //    //This is the comparison class
-        //    var compareLogic = new CompareLogic();
+            foreach (var completelyNewValue in completelyNewValues)
+            {
+                var update = new CryptocurrencyOverviewUpdateDto()
+                {
+                    UpdateType = CryptocurrencyOverviewUpdateType.Create,
+                    Data = completelyNewValue
+                };
+            }
 
-
-        //    ComparisonResult result = compareLogic.Compare(person1, person2);
-
-        //    //These will be different, write out the differences
-        //    if (!result.AreEqual)
-        //        Console.WriteLine(result.DifferencesString);
-        //}
+            return updates;
+        }
 
 
 
 
-        private ConcurrentDictionary<string, CryptocurrencyOverviewDto> _currentCryptocurrencyOverviewData = new ConcurrentDictionary<string, CryptocurrencyOverviewDto>();
-        private IBinanceClient _binanceClient;
-        private ICoinGeckoClient _coinGeckoClient;
-        private int _updatecyclePeriod = 30000;
+        private ConcurrentDictionary<string, CryptocurrencyOverviewDto> _currentCryptocurrencyOverviewData = new();
+        private readonly IBinanceClient _binanceClient;
+        private readonly ICoinGeckoClient _coinGeckoClient;
+        private int _updatecyclePeriod = 60000;
         private IHubContext<CryptocurrencyOverviewUpdateHub, ICryptocurrencyOverviewUpdateHub> _updateHub;
-        private EventWaitHandle _waitHandle = new EventWaitHandle(false, EventResetMode.ManualReset);
+        private EventWaitHandle _waitHandle = new(false, EventResetMode.ManualReset);
     }
 }

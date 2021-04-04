@@ -1,0 +1,21 @@
+﻿@page "/detail/{Ticker}"
+
+@using Syncfusion.Blazor.Charts;
+
+
+<SfStockChart></SfStockChart>
+
+<h1>This is @Ticker test</h1>
+
+@code {
+    [Parameter]
+    public string Ticker { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        base.OnInitialized();
+
+    }
+
+
+}

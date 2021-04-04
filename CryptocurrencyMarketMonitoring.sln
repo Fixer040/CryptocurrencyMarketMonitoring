@@ -21,7 +21,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CryptocurrencyMarketMonitor
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CryptocurrencyMarketMonitoring.Model.Documents", "CryptocurrencyMarketMonitoring\Model.Documents\CryptocurrencyMarketMonitoring.Model.Documents.csproj", "{E2349DC4-6429-4375-BD72-ED36C8FB5485}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryptocurrencyMarketMonitoring.SignalR", "CryptocurrencyMarketMonitoring\SignalR\CryptocurrencyMarketMonitoring.SignalR.csproj", "{ABFEF153-4071-4B92-A9B7-3ED5F335D01D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CryptocurrencyMarketMonitoring.SignalR", "CryptocurrencyMarketMonitoring\SignalR\CryptocurrencyMarketMonitoring.SignalR.csproj", "{ABFEF153-4071-4B92-A9B7-3ED5F335D01D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
