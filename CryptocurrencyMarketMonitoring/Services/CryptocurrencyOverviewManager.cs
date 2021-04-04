@@ -16,12 +16,12 @@ using Binance.Net.Interfaces;
 using System.Threading;
 using Force.DeepCloner;
 using KellermanSoftware.CompareNetObjects;
+using Microsoft.Extensions.Hosting;
 
 namespace CryptocurrencyMarketMonitoring.Services
 {
 
-    //TODO: IHostedService
-    public class CryptocurrencyOverviewManager : ICryptocurrencyOverviewManager
+    public class CryptocurrencyOverviewManager : BackgroundService, ICryptocurrencyOverviewManager
     {
 
         public CryptocurrencyOverviewManager(IHubContext<CryptocurrencyOverviewUpdateHub, ICryptocurrencyOverviewUpdateHub> updateHub, ICoinGeckoClient coinGeckoClient, IBinanceClient binanceClient)
@@ -29,36 +29,51 @@ namespace CryptocurrencyMarketMonitoring.Services
             _updateHub = updateHub;
             _binanceClient = binanceClient;
             _coinGeckoClient = coinGeckoClient;
+        }
 
-            _ = InitAsync();
+        public override async Task StartAsync(CancellationToken cancellationToken)
+        {
+            await UpdateDataAsync();
+
+            _waitHandle.Set();
+
+            _executingTask = ExecuteAsync(_stoppingCts.Token);
+
+            return;
+        }
+
+        public override async Task StopAsync(CancellationToken cancellationToken)
+        {
+            if (_executingTask == null)
+                return;
+
+            try
+            {
+                _stoppingCts.Cancel();
+            }
+            finally
+            {
+                await Task.WhenAny(_executingTask, Task.Delay(Timeout.Infinite, cancellationToken));
+            }
         }
 
 
         public async Task<IEnumerable<CryptocurrencyOverviewDto>> GetCryptocurrencyOverviewAllAsync()
         {
             _waitHandle.WaitOne();
+
             return _currentCryptocurrencyOverviewData.Values.OrderBy(x => x.Ranking).ToList();
         }
 
-        private async Task InitAsync()
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            await UpdateDataAsync();
-
-            _waitHandle.Set();
-
-            _ = Task.Run(DoUpdateCycleAsync);
-        }
-
-        private async Task DoUpdateCycleAsync()
-        {
-            while (true)
+            while (!stoppingToken.IsCancellationRequested)
             {
                 await UpdateDataAsync();
-                await Task.Delay(_updatecyclePeriod);
-            }
 
+                await Task.Delay(_updateCyclePeriod, stoppingToken);
+            }
         }
-       
 
         private async Task UpdateDataAsync()
         {
@@ -139,14 +154,20 @@ namespace CryptocurrencyMarketMonitoring.Services
             return updates;
         }
 
-
+        public override void Dispose()
+        {
+            GC.SuppressFinalize(this);
+            _stoppingCts.Cancel();
+        }
 
 
         private ConcurrentDictionary<string, CryptocurrencyOverviewDto> _currentCryptocurrencyOverviewData = new();
         private readonly IBinanceClient _binanceClient;
         private readonly ICoinGeckoClient _coinGeckoClient;
-        private int _updatecyclePeriod = 60000;
-        private IHubContext<CryptocurrencyOverviewUpdateHub, ICryptocurrencyOverviewUpdateHub> _updateHub;
+        private int _updateCyclePeriod = 60000;
+        private readonly IHubContext<CryptocurrencyOverviewUpdateHub, ICryptocurrencyOverviewUpdateHub> _updateHub;
         private EventWaitHandle _waitHandle = new(false, EventResetMode.ManualReset);
+        private Task _executingTask;
+        private readonly CancellationTokenSource _stoppingCts = new();
     }
 }
