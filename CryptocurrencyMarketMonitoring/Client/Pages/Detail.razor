@@ -1,19 +1,48 @@
 ﻿@page "/detail/{Ticker}"
 
 @using Syncfusion.Blazor.Charts;
+@using CryptocurrencyMarketMonitoring.Shared
+@using System.Linq;
+@using System.Collections.Generic;
+@using Syncfusion.Blazor.Data
 
 
-<SfStockChart></SfStockChart>
+@inject HttpClient Http
 
-<h1>This is @Ticker test</h1>
+
+
+
+<SfStockChart>
+    <SfDataManager Url="@($"ChartData/{Ticker}")" Adaptor="Syncfusion.Blazor.Adaptors.WebApiAdaptor"></SfDataManager>
+    <StockChartSeriesCollection>
+        <StockChartSeries Type="ChartSeriesType.Candle"
+                          XName="@nameof(ChartDataDto.Date)"
+                          YName="@nameof(ChartDataDto.Close)"
+                          High="@nameof(ChartDataDto.High)"
+                          Low="@nameof(ChartDataDto.Low)"
+                          Open="@nameof(ChartDataDto.Open)"
+                          Close="@nameof(ChartDataDto.Close)"
+                          Volume="@nameof(ChartDataDto.Volume)">
+        </StockChartSeries>
+    </StockChartSeriesCollection>
+</SfStockChart>
 
 @code {
     [Parameter]
     public string Ticker { get; set; }
 
+
+    public List<ChartDataDto> ChartData { get; set; }
+
     protected override async Task OnInitializedAsync()
     {
+
+        //var cryptocurrencyList = await Http.GetFromJsonAsync<ChartDataDto[]>($"ChartData/{Ticker}");
+
+        //ChartData = cryptocurrencyList.ToList();
+
         base.OnInitialized();
+
 
     }
 

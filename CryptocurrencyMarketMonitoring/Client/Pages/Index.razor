@@ -28,7 +28,7 @@
             </GridSortColumns>
         </GridSortSettings>
         <GridColumns>
-            <GridColumn Field="@nameof(CryptocurrencyOverviewDto.Ranking)" HeaderText="Ranking" TextAlign="TextAlign.Center" Format="#0" />
+            <GridColumn Field="@nameof(CryptocurrencyOverviewDto.Ranking)" HeaderText="Ranking" TextAlign="TextAlign.Center" />
             <GridColumn HeaderText="" TextAlign="TextAlign.Center" Width="45" AllowSorting="false">
                 <Template>
                     @{
@@ -39,7 +39,7 @@
                     }
                 </Template>
             </GridColumn>
-            <GridColumn Field="@nameof(CryptocurrencyOverviewDto.Name)" HeaderText="Name" TextAlign="TextAlign.Center" />
+            <GridColumn Field="@nameof(CryptocurrencyOverviewDto.Name)" HeaderText="Name" TextAlign="TextAlign.Center"/>
             <GridColumn Field="@nameof(CryptocurrencyOverviewDto.Ticker)" HeaderText="Symbol" TextAlign="TextAlign.Center">
                 <Template>
                     @{
@@ -51,7 +51,16 @@
                     }
                 </Template>
             </GridColumn>
-            <GridColumn Field="@nameof(CryptocurrencyOverviewDto.PriceUSD)" HeaderText="Price" TextAlign="TextAlign.Center" Format="$0.00" />
+            <GridColumn Field="@nameof(CryptocurrencyOverviewDto.PriceUSD)" HeaderText="Price" TextAlign="TextAlign.Center">
+                <Template>
+                    @{
+                        var dto = (CryptocurrencyOverviewDto)context;
+                        var priceString = dto.PriceUSD < 1 ? dto.PriceUSD.ToString("$0.0000") : dto.PriceUSD.ToString("$0.00");
+
+                        <div>@priceString</div>
+                    }
+                </Template>
+            </GridColumn>
             <GridColumn Field="@nameof(CryptocurrencyOverviewDto.LastDayPercentageMovement)" HeaderText="24h" TextAlign="TextAlign.Center">
                 <Template>
                     @{
@@ -70,8 +79,8 @@
                     }
                 </Template>
             </GridColumn>
-            <GridColumn Field="@nameof(CryptocurrencyOverviewDto.VolumeUSD)" HeaderText="Volume" TextAlign="TextAlign.Center" Format="$000,000,000" />
-            <GridColumn Field="@nameof(CryptocurrencyOverviewDto.MarketCapUSD)" HeaderText="Market cap" TextAlign="TextAlign.Center" Format="$000,000,000" />
+            <GridColumn Field="@nameof(CryptocurrencyOverviewDto.VolumeUSD)" HeaderText="Volume" TextAlign="TextAlign.Center" Format="C0" />
+            <GridColumn Field="@nameof(CryptocurrencyOverviewDto.MarketCapUSD)" HeaderText="Market cap" TextAlign="TextAlign.Center" Format="C0" />
 
 
         </GridColumns>

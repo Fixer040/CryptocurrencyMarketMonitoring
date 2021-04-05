@@ -36,7 +36,7 @@ namespace CryptocurrencyMarketMonitoring.Server
         public override void ConfigureServices(IServiceCollection services)
         {
 
-            services.AddControllersWithViews();
+            services.AddControllersWithViews().AddJsonOptions(opts => opts.JsonSerializerOptions.PropertyNamingPolicy = null);
             services.AddRazorPages();
             services.AddSignalR()
                 .AddJsonProtocol(options =>
