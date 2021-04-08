@@ -20,10 +20,10 @@ namespace CryptocurrencyMarketMonitoring.Server.Controllers
         }
 
         [HttpGet("{ticker}")]
-        public async Task<IActionResult> GetCryptocurrencyList(string ticker)
+        public async Task<IActionResult> GetCryptocurrencyList(string ticker, [FromQuery]int intervalType)
         {
-            var data = await _chartDataService.GetChartDataAsync(ticker);
-            return Ok(new { Items = data, Count = data.Count() });
+            var data = await _chartDataService.GetChartDataAsync(ticker, intervalType);
+            return Ok(data);
         }
 
         private readonly ILogger<CryptocurrencyOverviewController> _logger;

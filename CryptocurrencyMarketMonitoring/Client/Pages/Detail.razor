@@ -12,10 +12,31 @@
 
 
 
-<SfStockChart>
-    <SfDataManager Url="@($"ChartData/{Ticker}")" Adaptor="Syncfusion.Blazor.Adaptors.WebApiAdaptor"></SfDataManager>
+<SfStockChart EnablePeriodSelector="true" @ref="StockChart">
+    @*<SfDataManager Url="@($"ChartData/{Ticker}")" Adaptor="Syncfusion.Blazor.Adaptors.WebApiAdaptor"></SfDataManager>*@
+    <StockChartTooltipSettings Enable="true"></StockChartTooltipSettings>
+    @*<StockChartEvents RangeChange="RangeChanged"></StockChartEvents>*@
+    <StockChartCrosshairSettings Enable="true"></StockChartCrosshairSettings>
+    <StockChartPeriods>
+        <StockChartPeriod IntervalType=RangeIntervalType.Days Interval="1" Text="1m" ></StockChartPeriod>
+        <StockChartPeriod IntervalType=RangeIntervalType.Days Interval="2" Text='3m'></StockChartPeriod>
+        <StockChartPeriod IntervalType=RangeIntervalType.Days Interval="3" Text='5m'></StockChartPeriod>
+        <StockChartPeriod IntervalType=RangeIntervalType.Days Interval="4" Text='15m'></StockChartPeriod>
+        <StockChartPeriod IntervalType=RangeIntervalType.Days Interval="5" Text="30m" ></StockChartPeriod>
+        <StockChartPeriod IntervalType=RangeIntervalType.Days Interval="10" Text='1h' Selected="true"></StockChartPeriod>
+        <StockChartPeriod IntervalType=RangeIntervalType.Days Interval="20" Text='2h'></StockChartPeriod>
+        <StockChartPeriod IntervalType=RangeIntervalType.Days Interval="40" Text='4h'></StockChartPeriod>
+        <StockChartPeriod IntervalType=RangeIntervalType.Days Interval="60" Text="6h" ></StockChartPeriod>
+        <StockChartPeriod IntervalType=RangeIntervalType.Days Interval="80" Text='8h'></StockChartPeriod>
+        <StockChartPeriod IntervalType=RangeIntervalType.Days Interval="120" Text='12h'></StockChartPeriod>
+        <StockChartPeriod IntervalType=RangeIntervalType.Months Interval="10" Text='1D'></StockChartPeriod>
+        <StockChartPeriod IntervalType=RangeIntervalType.Months Interval="30" Text='3D'></StockChartPeriod>
+        <StockChartPeriod IntervalType=RangeIntervalType.Years Interval="1" Text='1W'></StockChartPeriod>
+        <StockChartPeriod IntervalType=RangeIntervalType.Years Interval="5" Text='1M'></StockChartPeriod>
+
+    </StockChartPeriods>
     <StockChartSeriesCollection>
-        <StockChartSeries Type="ChartSeriesType.Candle"
+        <StockChartSeries DataSource="@ChartData" Type="ChartSeriesType.Candle"
                           XName="@nameof(ChartDataDto.Date)"
                           YName="@nameof(ChartDataDto.Close)"
                           High="@nameof(ChartDataDto.High)"
@@ -36,15 +57,58 @@
 
     protected override async Task OnInitializedAsync()
     {
+        _activeIntervalType = 0;
+        var cryptocurrencyList = await Http.GetFromJsonAsync<ChartDataDto[]>($"ChartData/{Ticker}?intervalType=0");
 
-        //var cryptocurrencyList = await Http.GetFromJsonAsync<ChartDataDto[]>($"ChartData/{Ticker}");
+        ChartData = cryptocurrencyList.ToList();
 
-        //ChartData = cryptocurrencyList.ToList();
+        //StockChart.Refresh();
 
         base.OnInitialized();
+    }
 
+    //public void RangeChanged(StockChartRangeChangeEventArgs args)
+    //{
+    //    var end = (DateTime)args.End;
+    //    var start = (DateTime)args.Start;
+    //    var endMinusStart = (end - start).TotalDays;
+    //    var intervalType = endMinusStart switch
+    //    {
+    //        1 => 0,
+    //        2 => 1,
+    //        3 => 2,
+    //        4 => 3,
+    //        5 => 4,
+    //        10 => 5,
+    //        20 => 6,
+    //        40 => 7,
+    //        60 => 8,
+    //        80 => 9,
+    //        120 => 10,
+    //        300 => 11,
+    //        900 => 12,
+    //        365 => 13,
+    //        1825 => 14,
+    //        _ => _activeIntervalType
+
+    //    };
+
+    //    if (intervalType != _activeIntervalType)
+    //    {
+    //        _ = UpdateGrid(intervalType);
+    //        _activeIntervalType = intervalType;
+    //    }
+    //}
+
+    public async Task UpdateGrid(int intervalType)
+    {
+        var cryptocurrencyList = await Http.GetFromJsonAsync<ChartDataDto[]>($"ChartData/{Ticker}?intervalType={intervalType}");
+
+        ChartData = cryptocurrencyList.ToList();        // Here you can customize your code
+        StockChart.Refresh();
 
     }
 
-
+    public SfStockChart StockChart;
+    private int _activeIntervalType = 0;
 }

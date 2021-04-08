@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Linq;
 using CryptocurrencyMarketMonitoring.Abstractions.Managers;
 using Binance.Net.Interfaces;
+using Binance.Net.Enums;
 
 namespace CryptocurrencyMarketMonitoring.Services
 {
@@ -17,9 +18,9 @@ namespace CryptocurrencyMarketMonitoring.Services
             _binanceClient = binanceClient;
         }
 
-        public async Task<IEnumerable<ChartDataDto>> GetChartDataAsync(string ticker)
+        public async Task<IEnumerable<ChartDataDto>> GetChartDataAsync(string ticker, int intervalType)
         {
-            var binanceKLines = await _binanceClient.Spot.Market.GetKlinesAsync($"{ticker}USDT", Binance.Net.Enums.KlineInterval.OneDay);
+            var binanceKLines = await _binanceClient.Spot.Market.GetKlinesAsync($"{ticker}USDT", (KlineInterval)intervalType, limit: 500);
 
             var retval = new List<ChartDataDto>();
 
@@ -39,7 +40,6 @@ namespace CryptocurrencyMarketMonitoring.Services
             }
 
             return retval;
-
         }
 
         IBinanceClient _binanceClient;

@@ -1,10 +1,13 @@
 ﻿@inherits LayoutComponentBase
+@inject NavigationManager NavigationManager
 
 
-<div class="topbar">
-    <NavMenu />
-</div>
-
+@if (!NavigationManager.Uri.Contains("login") && !NavigationManager.Uri.Contains("logout"))
+{
+    <div class="topbar py-0">
+        <NavMenu />
+    </div>
+}
 
 
 <div class="page text-center justify-content-center">
@@ -21,7 +24,7 @@
 
 
 <!-- Footer -->
-<footer class="page-footer topbar font-small pt-0 fixed-bottom">
+<footer class="page-footer footerbar font-small pt-0 fixed-bottom">
     <div class="footer-copyright text-center py-1">
         ©2021 Daniel Večeř
     </div>

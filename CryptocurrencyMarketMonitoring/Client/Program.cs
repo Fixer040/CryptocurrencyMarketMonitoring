@@ -7,7 +7,11 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using CryptocurrencyMarketMonitoring.Client.Services;
 using Syncfusion.Blazor;
+
+
+
 
 namespace CryptocurrencyMarketMonitoring.Client
 {
@@ -17,13 +21,29 @@ namespace CryptocurrencyMarketMonitoring.Client
         {
             var builder = WebAssemblyHostBuilder.CreateDefault(args);
 			builder.Services.AddSyncfusionBlazor();
+			
+			
+		
             builder.RootComponents.Add<App>("#app");
 
-            Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("NDA0MTUwQDMxMzgyZTM0MmUzMEpKVDI5bDh6aTFYbEdGZi9NelZ1MnFKa2V0WmFGZE5PUmR1bFJ2M0pDNzg9");
+            Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("NDI2MDAyQDMxMzgyZTM0MmUzMGRVdUIyTVhyNm9wbUVPRmtDMGsvL3hsTm9KNXdkVDJYMVROTmwzTy9LVlU9");
 
-            builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
+            builder.Services
+                .AddScoped<IAuthenticationService, AuthenticationService>()
+                .AddScoped<IHttpService, HttpService>()
+                .AddScoped<ILocalStorageService, LocalStorageService>();
 
-            await builder.Build().RunAsync();
+
+            builder.Services.AddScoped(x => {
+                return new HttpClient() { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) };
+            });
+
+            var host = builder.Build();
+
+            var authenticationService = host.Services.GetRequiredService<IAuthenticationService>();
+            await authenticationService.Initialize();
+
+            await host.RunAsync();
         }
     }
 }

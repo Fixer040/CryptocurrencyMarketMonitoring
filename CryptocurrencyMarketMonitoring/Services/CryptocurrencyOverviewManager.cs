@@ -102,6 +102,14 @@ namespace CryptocurrencyMarketMonitoring.Services
                 newValues.Add(cryptocurrency);
             }
 
+            foreach (var key in _currentCryptocurrencyOverviewData.Keys)
+            {
+                if (!newValues.Any(x => x.Ticker == key))
+                {
+                    _currentCryptocurrencyOverviewData.TryRemove(key, out _);
+                }
+            }
+
             var updates = GetCryptocurrencyOverviewUpdates(oldValues, newValues);
             await _updateHub.Clients.All.SendUpdateAsync(updates);
 

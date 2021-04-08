@@ -1,0 +1,11 @@
+﻿@page "/logout"
+@using CryptocurrencyMarketMonitoring.Client.Services; 
+
+@inject IAuthenticationService AuthenticationService
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await AuthenticationService.Logout();
+    }
+}

@@ -54,6 +54,9 @@ namespace CryptocurrencyMarketMonitoring.Server
                     new[] { "application/octet-stream" });
             });
 
+            services.Configure<JwtOptions>(Configuration.GetSection("JwtOptions"));
+
+
         }
 
         public void ConfigureContainer(ContainerBuilder builder)

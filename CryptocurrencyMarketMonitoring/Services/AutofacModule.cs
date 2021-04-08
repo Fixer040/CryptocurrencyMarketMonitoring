@@ -1,4 +1,5 @@
 ﻿using Autofac;
+using AutoMapper;
 using Binance.Net;
 using Binance.Net.Interfaces;
 using CoinGecko.Clients;
@@ -22,7 +23,27 @@ namespace CryptocurrencyMarketMonitoring.Services
             builder.RegisterType<CryptocurrencyOverviewManager>().As<ICryptocurrencyOverviewManager>().As<IHostedService>().SingleInstance();
             builder.RegisterType<CoinGeckoClient>().As<ICoinGeckoClient>();
             builder.RegisterType<ChartDataService>().As<IChartDataService>();
+            builder.RegisterType<UserService>().As<IUserService>();
+
             builder.RegisterType<BinanceClient>().As<IBinanceClient>().SingleInstance();
+
+
+            builder.Register(context => new MapperConfiguration(cfg =>
+            {
+                //cfg.CreateMap<MyModel, MyDto>;
+                //etc...
+            })).AsSelf().SingleInstance();
+
+
+            builder.Register(c =>
+            {
+                //This resolves a new context that can be used later.
+                var context = c.Resolve<IComponentContext>();
+                var config = context.Resolve<MapperConfiguration>();
+                return config.CreateMapper(context.Resolve);
+            })
+            .As<IMapper>()
+            .InstancePerLifetimeScope();
         }
     }
 }

@@ -7,8 +7,9 @@ using System.Threading.Tasks;
 
 namespace CryptocurrencyMarketMonitoring.Abstractions.Services
 {
-    public interface IChartDataService
+    public interface IUserService
     {
-        Task<IEnumerable<ChartDataDto>> GetChartDataAsync(string ticker, int intervalType);
+        UserDto Login(LoginDto login);
+        UserDto GetById(string id);
     }
 }

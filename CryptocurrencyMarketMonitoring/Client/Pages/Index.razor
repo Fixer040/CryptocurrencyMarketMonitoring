@@ -7,6 +7,7 @@
 @using Microsoft.AspNetCore.SignalR.Client
 @using System.Collections.Generic;
 @using Microsoft.Extensions.DependencyInjection;
+@using CryptocurrencyMarketMonitoring.Client.Services; 
 @implements IAsyncDisposable
 
 
@@ -15,7 +16,7 @@
 
 
 
-@inject HttpClient Http
+@inject IHttpService Http
 
 
 <div class="text-center justify-content-center">
@@ -94,9 +95,12 @@
     {
         base.OnInitialized();
 
-        var cryptocurrencyList = await Http.GetFromJsonAsync<CryptocurrencyOverviewDto[]>("CryptocurrencyOverview/list");
+        var cryptocurrencyList = await Http.Get<CryptocurrencyOverviewDto[]>("CryptocurrencyOverview/list");
+        //var cryptocurrencyList = await Http.GetFromJsonAsync<CryptocurrencyOverviewDto[]>("CryptocurrencyOverview/list");
 
         Cryptocurrencies = new List<CryptocurrencyOverviewDto>(cryptocurrencyList);
+
+        Grid.Refresh();
 
         _updateHubConnection = new HubConnectionBuilder().AddJsonProtocol(options =>
         {
