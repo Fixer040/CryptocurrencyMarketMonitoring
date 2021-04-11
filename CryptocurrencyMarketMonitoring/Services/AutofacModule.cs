@@ -24,7 +24,6 @@ namespace CryptocurrencyMarketMonitoring.Services
             builder.RegisterType<CoinGeckoClient>().As<ICoinGeckoClient>();
             builder.RegisterType<ChartDataService>().As<IChartDataService>();
             builder.RegisterType<UserService>().As<IUserService>();
-
             builder.RegisterType<BinanceClient>().As<IBinanceClient>().SingleInstance();
 
 

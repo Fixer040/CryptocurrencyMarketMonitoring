@@ -77,7 +77,7 @@ namespace CryptocurrencyMarketMonitoring.Services
 
         private async Task UpdateDataAsync()
         {
-            var coinMarkets = await _coinGeckoClient.CoinsClient.GetCoinMarkets("usd", Array.Empty<string>(), "market_cap_desc", 100, 1, true, "7d,24h", null);
+            var coinMarkets = await _coinGeckoClient.CoinsClient.GetCoinMarkets("usd", Array.Empty<string>(), "market_cap_desc", 250, 1, true, "7d,24h", null);
 
             var oldValues = _currentCryptocurrencyOverviewData.Values.Select(x => x.DeepClone()).ToList();
             var newValues = new List<CryptocurrencyOverviewDto>();

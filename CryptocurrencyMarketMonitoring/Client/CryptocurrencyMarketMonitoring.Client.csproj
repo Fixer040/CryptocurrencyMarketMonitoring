@@ -19,4 +19,10 @@
     <ProjectReference Include="..\SignalR\CryptocurrencyMarketMonitoring.SignalR.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Update="wwwroot\img\logo2.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
 </Project>

@@ -20,9 +20,10 @@
 
 
 <div class="text-center justify-content-center">
-    <h1 class="text-capitalize text-dark">Top 100 cryptocurrency prices today</h1>
+    <h1 class="text-capitalize text-dark">Cryptocurrency prices today</h1>
 
-    <SfGrid @ref="Grid" DataSource="@Cryptocurrencies" AllowSorting="true" >
+    <SfGrid @ref="Grid" DataSource="@Cryptocurrencies" AllowSorting="true" AllowPaging="true">
+        <GridPageSettings PageSize="100"></GridPageSettings>
         <GridSortSettings>
             <GridSortColumns>
                 <GridSortColumn Field="@nameof(CryptocurrencyOverviewDto.Ranking)" Direction="SortDirection.Ascending"></GridSortColumn>
@@ -30,7 +31,7 @@
         </GridSortSettings>
         <GridColumns>
             <GridColumn Field="@nameof(CryptocurrencyOverviewDto.Ranking)" HeaderText="Ranking" TextAlign="TextAlign.Center" />
-            <GridColumn HeaderText="" TextAlign="TextAlign.Center" Width="45" AllowSorting="false">
+            <GridColumn HeaderText="" TextAlign="TextAlign.Center" Width="45" AllowSorting="false" >
                 <Template>
                     @{
                         var employee = (context as CryptocurrencyOverviewDto);
@@ -40,8 +41,8 @@
                     }
                 </Template>
             </GridColumn>
-            <GridColumn Field="@nameof(CryptocurrencyOverviewDto.Name)" HeaderText="Name" TextAlign="TextAlign.Center"/>
-            <GridColumn Field="@nameof(CryptocurrencyOverviewDto.Ticker)" HeaderText="Symbol" TextAlign="TextAlign.Center">
+            <GridColumn Field="@nameof(CryptocurrencyOverviewDto.Name)" HeaderText="Name" TextAlign="TextAlign.Center"  />
+            <GridColumn Field="@nameof(CryptocurrencyOverviewDto.Ticker)" HeaderText="Symbol" TextAlign="TextAlign.Center" >
                 <Template>
                     @{
                         var ticker = ((CryptocurrencyOverviewDto)context).Ticker;
@@ -52,17 +53,17 @@
                     }
                 </Template>
             </GridColumn>
-            <GridColumn Field="@nameof(CryptocurrencyOverviewDto.PriceUSD)" HeaderText="Price" TextAlign="TextAlign.Center">
+            <GridColumn Field="@nameof(CryptocurrencyOverviewDto.PriceUSD)" HeaderText="Price" TextAlign="TextAlign.Center" >
                 <Template>
                     @{
                         var dto = (CryptocurrencyOverviewDto)context;
-                        var priceString = dto.PriceUSD < 1 ? dto.PriceUSD.ToString("$0.0000") : dto.PriceUSD.ToString("$0.00");
+                        var priceString = dto.PriceUSD < 1 ? dto.PriceUSD.ToString("$###,###,##0.0000") : dto.PriceUSD.ToString("$###,###,##0.00");
 
                         <div>@priceString</div>
                     }
                 </Template>
             </GridColumn>
-            <GridColumn Field="@nameof(CryptocurrencyOverviewDto.LastDayPercentageMovement)" HeaderText="24h" TextAlign="TextAlign.Center">
+            <GridColumn Field="@nameof(CryptocurrencyOverviewDto.LastDayPercentageMovement)" HeaderText="24h" TextAlign="TextAlign.Center" >
                 <Template>
                     @{
                         <div class="@(((CryptocurrencyOverviewDto)context).LastDayPercentageMovement < 0 ? "text-danger" : "text-success")">
@@ -71,7 +72,7 @@
                     }
                 </Template>
             </GridColumn>
-            <GridColumn Field="@nameof(CryptocurrencyOverviewDto.LastWeekPercentageMovement)" HeaderText="7d" TextAlign="TextAlign.Center">
+            <GridColumn Field="@nameof(CryptocurrencyOverviewDto.LastWeekPercentageMovement)" HeaderText="7d" TextAlign="TextAlign.Center" >
                 <Template>
                     @{
                         <div class="@(((CryptocurrencyOverviewDto)context).LastWeekPercentageMovement < 0 ? "text-danger" : "text-success")">
@@ -80,8 +81,8 @@
                     }
                 </Template>
             </GridColumn>
-            <GridColumn Field="@nameof(CryptocurrencyOverviewDto.VolumeUSD)" HeaderText="Volume" TextAlign="TextAlign.Center" Format="C0" />
-            <GridColumn Field="@nameof(CryptocurrencyOverviewDto.MarketCapUSD)" HeaderText="Market cap" TextAlign="TextAlign.Center" Format="C0" />
+            <GridColumn Field="@nameof(CryptocurrencyOverviewDto.VolumeUSD)" HeaderText="Volume" TextAlign="TextAlign.Center" Format="$###,###,###,###,###,###" />
+            <GridColumn Field="@nameof(CryptocurrencyOverviewDto.MarketCapUSD)" HeaderText="Market cap" TextAlign="TextAlign.Center" Format="$###,###,###,###,###,###" />
 
 
         </GridColumns>

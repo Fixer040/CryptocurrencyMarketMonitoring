@@ -7,7 +7,13 @@
 
 <div class="col-md-6 offset-md-3 mt-5">
     <div class="card">
-        <h4 class="card-header">Blazor WebAssembly JWT Login Example</h4>
+        <div class="card-header">
+            <img src="/img/logo2.png" width="141" height="50" class="float-left" alt="">
+
+            <h4 class="text-white">Login to DVCRYPTO</h4>
+            <h6 class="text-white">Don't have an acount yet? <a href="register" class="text-info">Register here</a></h6>
+
+        </div>
         <div class="card-body">
             <EditForm Model="@_login" OnValidSubmit="HandleValidSubmit">
                 <DataAnnotationsValidator />
