@@ -17,6 +17,7 @@ namespace CryptocurrencyMarketMonitoring.Client.Services
     {
         Task<T> Get<T>(string uri);
         Task<T> Post<T>(string uri, object value);
+        Task Post(string uri, object value);
         Task<T> Put<T>(string uri, object value);
         Task<T> Delete<T>(string uri);
     }
@@ -54,6 +55,13 @@ namespace CryptocurrencyMarketMonitoring.Client.Services
             return await SendRequest<T>(request);
         }
 
+        public async Task Post(string uri, object value)
+        {
+            var request = new HttpRequestMessage(HttpMethod.Post, uri);
+            request.Content = new StringContent(JsonSerializer.Serialize(value), Encoding.UTF8, "application/json");
+            await SendRequest(request);
+        }
+
         public async Task<T> Put<T>(string uri, object value)
         {
             var request = new HttpRequestMessage(HttpMethod.Put, uri);
@@ -89,11 +97,36 @@ namespace CryptocurrencyMarketMonitoring.Client.Services
             // throw exception on error response
             if (!response.IsSuccessStatusCode)
             {
-                var error = await response.Content.ReadFromJsonAsync<Dictionary<string, string>>();
-                throw new Exception(error["message"]);
+                var error = await response.Content.ReadFromJsonAsync<ErrorMessageDto>();
+                throw new Exception(error.Message);
             }
 
             return await response.Content.ReadFromJsonAsync<T>();
+        }
+
+        private async Task SendRequest(HttpRequestMessage request)
+        {
+            // add jwt auth header if user is logged in and request is to the api url
+            var user = await _localStorageService.GetItem<UserDto>("user");
+            var isApiUrl = !request.RequestUri.IsAbsoluteUri;
+            if (user != null && isApiUrl)
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", user.Token);
+
+            using var response = await _httpClient.SendAsync(request);
+
+            // auto logout on 401 response
+            if (response.StatusCode == HttpStatusCode.Unauthorized)
+            {
+                _navigationManager.NavigateTo("logout");
+                return;
+            }
+
+            // throw exception on error response
+            if (!response.IsSuccessStatusCode)
+            {
+                var error = await response.Content.ReadFromJsonAsync<Dictionary<string, string>>();
+                throw new Exception(error["message"]);
+            }
         }
     }
 }

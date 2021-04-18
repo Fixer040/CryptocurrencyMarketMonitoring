@@ -1,0 +1,118 @@
+﻿@page "/register"
+@using CryptocurrencyMarketMonitoring.Client.Helpers;
+@using CryptocurrencyMarketMonitoring.Client.Services;
+@using CryptocurrencyMarketMonitoring.Shared;
+@inject IHttpService HttpService
+@inject IAuthenticationService AuthenticationService
+
+@inject NavigationManager NavigationManager
+
+<div class="background-login d-flex align-items-center justify-content-center">
+
+    <div class="w-25">
+        <div class="card text-center justify-content-center">
+            <div class="card-header">
+                <h4 class="text-white">Create an account</h4>
+                <h6 class="text-white">Already have an account? <a href="login" class="text-info">Sign In</a></h6>
+
+                <img src="/img/logo2.png" width="141" height="50" alt="">
+            </div>
+            <div class="card-body">
+                <EditForm Model="@_user" OnValidSubmit="HandleValidSubmit">
+                    <DataAnnotationsValidator />
+                    <div class="form-group d-flex justify-content-center">
+                        <label class="w-50">
+                            First name
+                            <InputText @bind-Value="_user.FirstName" class="form-control" />
+                            <ValidationMessage For="@(() => _user.FirstName)" />
+                        </label>
+                    </div>
+                    <div class="form-group d-flex justify-content-center">
+                        <label class="w-50">
+                            Last name
+                            <InputText @bind-Value="_user.LastName" class="form-control" />
+                            <ValidationMessage For="@(() => _user.LastName)" />
+                        </label>
+                    </div>
+                    <div class="form-group d-flex justify-content-center">
+                        <label class="w-50">
+                            E-mail
+                            <InputText @bind-Value="_user.Email" class="form-control" />
+                            <ValidationMessage For="@(() => _user.Email)" />
+                        </label>
+                    </div>
+                    <div class="form-group d-flex justify-content-center">
+                        <label class="w-50">
+                            Username
+                            <InputText @bind-Value="_user.Username" class="form-control" />
+                            <ValidationMessage For="@(() => _user.Username)" />
+                        </label>
+                    </div>
+                    <div class="form-group d-flex justify-content-center">
+                        <label class="w-50">
+                            Password
+                            <InputText @bind-Value="_user.Password" type="password" class="form-control" />
+                            <ValidationMessage For="@(() => _user.Password)" />
+                        </label>
+                    </div>
+                    <button class="btn btn-primary">
+                        @if (_loading)
+                        {
+                            <span class="spinner-border spinner-border-sm mr-1"></span>
+                        }
+                        Register
+                    </button>
+                    @if (!string.IsNullOrEmpty(_error))
+                    {
+                        <div class="alert alert-danger mt-3 mb-0">@_error</div>
+                    }
+                    else if (_success)
+                    {
+                        <div class="alert alert-success mt-3 mb-0">Registration finished! You will be automatically redirected to the login page</div>
+
+                    }
+                </EditForm>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+
+    protected override void OnInitialized()
+    {
+        // redirect to home if already logged in
+        if (AuthenticationService.User != null)
+        {
+            NavigationManager.NavigateTo("");
+        }
+    }
+
+    private async void HandleValidSubmit()
+    {
+        _loading = true;
+        _error = null;
+        try
+        {
+            await HttpService.Post("User/register", _user);
+
+            _success = true;
+            StateHasChanged();
+
+            await Task.Delay(5000);
+            NavigationManager.NavigateTo("login");
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+            _loading = false;
+            StateHasChanged();
+        }
+    }
+
+    private UserDto _user = new UserDto();
+    private bool _loading;
+    private string _error;
+    private bool _success;
+
+}

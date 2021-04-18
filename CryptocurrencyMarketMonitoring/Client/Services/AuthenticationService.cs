@@ -9,7 +9,7 @@ namespace CryptocurrencyMarketMonitoring.Client.Services
     {
         UserDto User { get; }
         Task Initialize();
-        Task Login(string username, string password);
+        Task Login(LoginDto login);
         Task Logout();
         public event Action OnChange;
 
@@ -41,9 +41,9 @@ namespace CryptocurrencyMarketMonitoring.Client.Services
             User = await _localStorageService.GetItem<UserDto>("user");
         }
 
-        public async Task Login(string username, string password)
+        public async Task Login(LoginDto login)
         {
-            User = await _httpService.Post<UserDto>("/User/login", new { username, password });
+            User = await _httpService.Post<UserDto>("/User/login", login);
             await _localStorageService.SetItem("user", User);
             NotifyStateChanged();
 

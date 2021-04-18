@@ -25,6 +25,7 @@ namespace CryptocurrencyMarketMonitoring.Model
             builder.Register(context => new MapperConfiguration(cfg =>
             {
                 cfg.CreateMap<User, UserDto>();
+                cfg.CreateMap<UserDto, User>();
             })).AsSelf().SingleInstance();
 
 

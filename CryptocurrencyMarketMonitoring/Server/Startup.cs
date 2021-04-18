@@ -1,9 +1,12 @@
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using CryptocurrencyMarketMonitoring.Abstractions;
+using CryptocurrencyMarketMonitoring.Shared;
 using CryptocurrencyMarketMonitoring.SignalR.Hubs;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Extensions.Configuration;
@@ -92,7 +95,20 @@ namespace CryptocurrencyMarketMonitoring.Server
             app.UseBlazorFrameworkFiles();
             app.UseStaticFiles();
 
+            app.UseExceptionHandler(c => c.Run(async context =>
+            {
+                var exception = context.Features
+                    .Get<IExceptionHandlerPathFeature>()
+                    .Error;
+                var response = new ErrorMessageDto { Message = exception.Message };
+                await context.Response.WriteAsJsonAsync(response);
+            }));
+
             app.UseRouting();
+
+
+
+            app.UseMiddleware<JwtMiddleware>();
 
 
             app.UseEndpoints(endpoints =>

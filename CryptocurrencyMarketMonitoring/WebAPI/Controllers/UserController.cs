@@ -18,12 +18,7 @@ namespace WebApi.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginDto login)
         {
-            var response = await _userService.LoginAsync(login);
-
-            if (response == null)
-                return BadRequest(new { message = "Username or password is incorrect" });
-
-            return Ok(response);
+            return Ok(await _userService.LoginAsync(login));
         }
 
         [HttpPost("register")]

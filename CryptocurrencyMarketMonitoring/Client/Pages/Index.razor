@@ -16,7 +16,7 @@
 
 
 
-@inject IHttpService Http
+@inject IHttpService HttpService
 
 
 <div class=" px-4 text-center justify-content-center w-75 m-auto">
@@ -97,7 +97,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var cryptocurrencyList = await Http.Get<OverviewDto[]>("Overview/list");
+        var cryptocurrencyList = await HttpService.Get<OverviewDto[]>("Overview/list");
         //var cryptocurrencyList = await Http.GetFromJsonAsync<CryptocurrencyOverviewDto[]>("CryptocurrencyOverview/list");
 
         Cryptocurrencies = new List<OverviewDto>(cryptocurrencyList);

@@ -31,12 +31,16 @@ namespace CryptocurrencyMarketMonitoring.Services
         {
             using (var unit = DIContainer.BeginScopeService<IUserUnit<User>>())
             {
-                var user = await unit.GetAsync(login.Username);
+                var user = await unit.GetAsync(x => x.Username == login.Username);
 
-                if (user == null) return null;
+                if (user == null)
+                    throw new Exception("User not found.");
 
                 var passwordCheck = _passwordHasherService.Check(user.PasswordHash, login.Password);
-                if (!passwordCheck.Verified) return null;
+
+                if (!passwordCheck.Verified)
+                    throw new Exception("Invalid password.");
+
 
                 var token = GenerateJwtToken(user);
                 user.Token = token;
