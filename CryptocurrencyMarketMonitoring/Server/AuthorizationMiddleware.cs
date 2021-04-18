@@ -25,21 +25,27 @@ namespace CryptocurrencyMarketMonitoring.Server
             var token = context.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
 
             if (token != null)
-                AttachUserToContext(context, userService, token);
+                await AttachUserToContextAsync(context, userService, token);
 
             await _next(context);
         }
 
-        private void AttachUserToContext(HttpContext context, IUserService userService, string token)
+        private async Task AttachUserToContextAsync(HttpContext context, IUserService userService, string token)
         {
             try
             {
                 var tokenHandler = new JwtSecurityTokenHandler();
-                var key = Encoding.ASCII.GetBytes(_jwtOptions.Secret);
+
+                var rsa = RSA.Create();
+                rsa.ImportRSAPublicKey(
+                    source: Convert.FromBase64String(_jwtOptions.Public),
+                    bytesRead: out int _
+                );
+
                 tokenHandler.ValidateToken(token, new TokenValidationParameters
                 {
                     ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    IssuerSigningKey = new RsaSecurityKey(rsa),
                     ValidateIssuer = false,
                     ValidateAudience = false,
                     // set clockskew to zero so tokens expire exactly at token expiration time (instead of 5 minutes later)
@@ -50,7 +56,7 @@ namespace CryptocurrencyMarketMonitoring.Server
                 var userId = jwtToken.Claims.First(x => x.Type == "id").Value;
 
                 // attach user to context on successful jwt validation
-                context.Items["User"] = userService.GetById(userId);
+                context.Items["User"] = await userService.GetAsync(userId);
             }
             catch
             {

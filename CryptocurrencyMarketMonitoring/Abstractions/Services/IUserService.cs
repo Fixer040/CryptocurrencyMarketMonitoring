@@ -9,7 +9,8 @@ namespace CryptocurrencyMarketMonitoring.Abstractions.Services
 {
     public interface IUserService
     {
-        UserDto Login(LoginDto login);
-        UserDto GetById(string id);
+        Task<UserDto> LoginAsync(LoginDto login);
+        Task CreateAsync(UserDto userDto);
+        Task<UserDto> GetAsync(string id);
     }
 }

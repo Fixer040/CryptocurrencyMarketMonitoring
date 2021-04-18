@@ -20,6 +20,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Update="wwwroot\img\login-background.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Update="wwwroot\img\logo2.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

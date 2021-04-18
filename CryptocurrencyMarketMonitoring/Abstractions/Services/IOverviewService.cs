@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 
 namespace CryptocurrencyMarketMonitoring.Abstractions.Services
 {
-    public interface ICryptocurrencyOverviewService
+    public interface IOverviewService
     {
-        Task<IEnumerable<CryptocurrencyOverviewDto>> GetCryptocurrencyListAsync();
+        Task<IEnumerable<OverviewDto>> GetCryptocurrencyListAsync();
     }
 }

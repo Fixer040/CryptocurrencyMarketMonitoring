@@ -5,3 +5,11 @@
     background: -webkit-linear-gradient(to right, #005c97, #363795); /* Chrome 10-25, Safari 5.1-6 */
     background: linear-gradient(to right, #005c97, #363795); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
 }
+
+.background-login {
+    background-image: url("/img/login-background.jpg");
+    background-size: cover;
+    height: calc(100vh - (70px));
+    padding: 0px;
+    margin: 0px;
+}

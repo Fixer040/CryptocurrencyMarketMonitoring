@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 
 namespace CryptocurrencyMarketMonitoring.SignalR.Hubs
 {
-    public interface ICryptocurrencyOverviewUpdateHub
+    public interface IOverviewUpdateClient
     {
-        Task SendUpdateAsync(IEnumerable<CryptocurrencyOverviewUpdateDto> cryptocurrencyUpdates);
+        Task ReceiveUpdate(IEnumerable<OverviewUpdateDto> cryptocurrencyUpdates);
     }
 }

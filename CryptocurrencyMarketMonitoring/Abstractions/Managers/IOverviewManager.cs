@@ -8,8 +8,8 @@ using System.Threading.Tasks;
 
 namespace CryptocurrencyMarketMonitoring.Abstractions.Managers
 {
-    public interface ICryptocurrencyOverviewManager : IHostedService, IDisposable
+    public interface IOverviewManager : IHostedService, IDisposable
     {
-        Task<IEnumerable<CryptocurrencyOverviewDto>> GetCryptocurrencyOverviewAllAsync();
+        Task<IEnumerable<OverviewDto>> GetCryptocurrencyOverviewAllAsync();
     }
 }

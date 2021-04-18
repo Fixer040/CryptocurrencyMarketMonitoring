@@ -21,10 +21,10 @@ using Microsoft.Extensions.Hosting;
 namespace CryptocurrencyMarketMonitoring.Services
 {
 
-    public class CryptocurrencyOverviewManager : BackgroundService, ICryptocurrencyOverviewManager
+    public class OverviewManager : BackgroundService, IOverviewManager
     {
 
-        public CryptocurrencyOverviewManager(IHubContext<CryptocurrencyOverviewUpdateHub, ICryptocurrencyOverviewUpdateHub> updateHub, ICoinGeckoClient coinGeckoClient, IBinanceClient binanceClient)
+        public OverviewManager(IHubContext<OverviewUpdateHub, IOverviewUpdateClient> updateHub, ICoinGeckoClient coinGeckoClient, IBinanceClient binanceClient)
         {
             _updateHub = updateHub;
             _binanceClient = binanceClient;
@@ -33,8 +33,7 @@ namespace CryptocurrencyMarketMonitoring.Services
 
         public override async Task StartAsync(CancellationToken cancellationToken)
         {
-            await UpdateDataAsync();
-
+            await UpdateDataAsync(sendUpdate: false);
             _waitHandle.Set();
 
             _executingTask = ExecuteAsync(_stoppingCts.Token);
@@ -58,7 +57,7 @@ namespace CryptocurrencyMarketMonitoring.Services
         }
 
 
-        public async Task<IEnumerable<CryptocurrencyOverviewDto>> GetCryptocurrencyOverviewAllAsync()
+        public async Task<IEnumerable<OverviewDto>> GetCryptocurrencyOverviewAllAsync()
         {
             _waitHandle.WaitOne();
 
@@ -69,21 +68,21 @@ namespace CryptocurrencyMarketMonitoring.Services
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                await UpdateDataAsync();
+                await UpdateDataAsync(true);
 
                 await Task.Delay(_updateCyclePeriod, stoppingToken);
             }
         }
 
-        private async Task UpdateDataAsync()
+        private async Task UpdateDataAsync(bool sendUpdate = false)
         {
             var coinMarkets = await _coinGeckoClient.CoinsClient.GetCoinMarkets("usd", Array.Empty<string>(), "market_cap_desc", 250, 1, true, "7d,24h", null);
 
             var oldValues = _currentCryptocurrencyOverviewData.Values.Select(x => x.DeepClone()).ToList();
-            var newValues = new List<CryptocurrencyOverviewDto>();
+            var newValues = new List<OverviewDto>();
             foreach (var coinMarket in coinMarkets)
             {
-                var cryptocurrency = new CryptocurrencyOverviewDto()
+                var cryptocurrency = new OverviewDto()
                 {
                     Ranking = coinMarket.MarketCapRank ?? 0,
                     Name = coinMarket.Name,
@@ -96,33 +95,34 @@ namespace CryptocurrencyMarketMonitoring.Services
                     IconSrc = coinMarket.Image
                 };
 
-
-
-                _currentCryptocurrencyOverviewData.AddOrUpdate(cryptocurrency.Ticker, cryptocurrency, (key, value) => cryptocurrency);
+                _currentCryptocurrencyOverviewData.AddOrUpdate(cryptocurrency.Name, cryptocurrency, (key, value) => cryptocurrency);
                 newValues.Add(cryptocurrency);
             }
 
             foreach (var key in _currentCryptocurrencyOverviewData.Keys)
             {
-                if (!newValues.Any(x => x.Ticker == key))
+                if (!newValues.Any(x => x.Name == key))
                 {
                     _currentCryptocurrencyOverviewData.TryRemove(key, out _);
                 }
             }
 
-            var updates = GetCryptocurrencyOverviewUpdates(oldValues, newValues);
-            await _updateHub.Clients.All.SendUpdateAsync(updates);
+            if (sendUpdate)
+            {
+                var updates = GetCryptocurrencyOverviewUpdates(oldValues, newValues);
 
+                await _updateHub.Clients.All.ReceiveUpdate(updates);
+            }
         }
 
-        private IEnumerable<CryptocurrencyOverviewUpdateDto> GetCryptocurrencyOverviewUpdates(IEnumerable<CryptocurrencyOverviewDto> oldValues, IEnumerable<CryptocurrencyOverviewDto> newValues)
+        private IEnumerable<OverviewUpdateDto> GetCryptocurrencyOverviewUpdates(IEnumerable<OverviewDto> oldValues, IEnumerable<OverviewDto> newValues)
         {
-            var updates = new List<CryptocurrencyOverviewUpdateDto>();
+            var updates = new List<OverviewUpdateDto>();
             foreach (var oldValue in oldValues)
             {
-                var matchingNewValue = newValues.FirstOrDefault(x => x.Ticker == oldValue.Ticker);
+                var matchingNewValue = newValues.FirstOrDefault(x => x.Name == oldValue.Name);
 
-                var update = new CryptocurrencyOverviewUpdateDto();
+                var update = new OverviewUpdateDto();
                 if (matchingNewValue != null)
                 {
                     var compareLogic = new CompareLogic();
@@ -130,31 +130,31 @@ namespace CryptocurrencyMarketMonitoring.Services
 
                     if (!comparisonResult.AreEqual)
                     {
-                        update.UpdateType = CryptocurrencyOverviewUpdateType.None;
+                        update.UpdateType = OverviewUpdateType.None;
                     }
                     else
                     {
-                        update.UpdateType = CryptocurrencyOverviewUpdateType.Update;
+                        update.UpdateType = OverviewUpdateType.Update;
                         update.Data = matchingNewValue;
                     }
                 }
                 else
                 {
-                    update.UpdateType = CryptocurrencyOverviewUpdateType.Delete;
+                    update.UpdateType = OverviewUpdateType.Delete;
                     update.Data = oldValue;
                 }
 
-                if (update.UpdateType != CryptocurrencyOverviewUpdateType.None)
+                if (update.UpdateType != OverviewUpdateType.None)
                     updates.Add(update);
             }
 
-            var completelyNewValues = newValues.Where(x => !oldValues.Any(y => y.Ticker == x.Ticker));
+            var completelyNewValues = newValues.Where(x => !oldValues.Any(y => y.Name == x.Name));
 
             foreach (var completelyNewValue in completelyNewValues)
             {
-                var update = new CryptocurrencyOverviewUpdateDto()
+                var update = new OverviewUpdateDto()
                 {
-                    UpdateType = CryptocurrencyOverviewUpdateType.Create,
+                    UpdateType = OverviewUpdateType.Create,
                     Data = completelyNewValue
                 };
             }
@@ -169,11 +169,11 @@ namespace CryptocurrencyMarketMonitoring.Services
         }
 
 
-        private ConcurrentDictionary<string, CryptocurrencyOverviewDto> _currentCryptocurrencyOverviewData = new();
+        private ConcurrentDictionary<string, OverviewDto> _currentCryptocurrencyOverviewData = new();
         private readonly IBinanceClient _binanceClient;
         private readonly ICoinGeckoClient _coinGeckoClient;
         private int _updateCyclePeriod = 60000;
-        private readonly IHubContext<CryptocurrencyOverviewUpdateHub, ICryptocurrencyOverviewUpdateHub> _updateHub;
+        private readonly IHubContext<OverviewUpdateHub, IOverviewUpdateClient> _updateHub;
         private EventWaitHandle _waitHandle = new(false, EventResetMode.ManualReset);
         private Task _executingTask;
         private readonly CancellationTokenSource _stoppingCts = new();

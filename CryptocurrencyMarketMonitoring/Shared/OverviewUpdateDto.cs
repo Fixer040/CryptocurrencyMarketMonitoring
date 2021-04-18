@@ -5,15 +5,15 @@ using System.Text;
 
 namespace CryptocurrencyMarketMonitoring.Shared
 {
-    public class CryptocurrencyOverviewUpdateDto
+    public class OverviewUpdateDto
     {
-        public CryptocurrencyOverviewUpdateType UpdateType { get; set; }
-        public CryptocurrencyOverviewDto Data { get; set; }
+        public OverviewUpdateType UpdateType { get; set; }
+        public OverviewDto Data { get; set; }
 
     }
 
 
-    public enum CryptocurrencyOverviewUpdateType
+    public enum OverviewUpdateType
     {
         None = 0,
         Update = 1,

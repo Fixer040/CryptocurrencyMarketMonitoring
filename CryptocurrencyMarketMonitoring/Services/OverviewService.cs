@@ -8,19 +8,19 @@ using CryptocurrencyMarketMonitoring.Abstractions.Managers;
 
 namespace CryptocurrencyMarketMonitoring.Services
 {
-    public class CryptocurrencyOverviewService : ICryptocurrencyOverviewService
+    public class OverviewService : IOverviewService
     {
 
-        public CryptocurrencyOverviewService(ICryptocurrencyOverviewManager cryptocurrencyOverviewManager)
+        public OverviewService(IOverviewManager cryptocurrencyOverviewManager)
         {
             _cryptocurrencyOverviewManager = cryptocurrencyOverviewManager;
         }
 
-        public async Task<IEnumerable<CryptocurrencyOverviewDto>> GetCryptocurrencyListAsync()
+        public async Task<IEnumerable<OverviewDto>> GetCryptocurrencyListAsync()
         {
             return await _cryptocurrencyOverviewManager.GetCryptocurrencyOverviewAllAsync();
         }
 
-        ICryptocurrencyOverviewManager _cryptocurrencyOverviewManager;
+        IOverviewManager _cryptocurrencyOverviewManager;
     }
 }

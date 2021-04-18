@@ -67,7 +67,6 @@ namespace CryptocurrencyMarketMonitoring.Server
             //builder.RegisterModule(new MyApplicationModule());
 
             builder.RegisterAutofacModules(Configuration, ContentRootPath);
-            //builder.RegisterSignalRHubs();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -101,7 +100,7 @@ namespace CryptocurrencyMarketMonitoring.Server
                 endpoints.MapRazorPages();
                 endpoints.MapControllers();
                 endpoints.MapFallbackToFile("index.html");
-                endpoints.MapHub<CryptocurrencyOverviewUpdateHub>("/overview-update");
+                endpoints.MapHub<OverviewUpdateHub>("/overview-update");
             });
         }
     }

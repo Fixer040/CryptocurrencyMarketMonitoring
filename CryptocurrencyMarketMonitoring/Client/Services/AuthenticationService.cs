@@ -1,5 +1,6 @@
 ﻿using CryptocurrencyMarketMonitoring.Shared;
 using Microsoft.AspNetCore.Components;
+using System;
 using System.Threading.Tasks;
 
 namespace CryptocurrencyMarketMonitoring.Client.Services
@@ -10,10 +11,14 @@ namespace CryptocurrencyMarketMonitoring.Client.Services
         Task Initialize();
         Task Login(string username, string password);
         Task Logout();
+        public event Action OnChange;
+
     }
 
     public class AuthenticationService : IAuthenticationService
     {
+        public event Action OnChange;
+
         private IHttpService _httpService;
         private NavigationManager _navigationManager;
         private ILocalStorageService _localStorageService;
@@ -40,6 +45,8 @@ namespace CryptocurrencyMarketMonitoring.Client.Services
         {
             User = await _httpService.Post<UserDto>("/User/login", new { username, password });
             await _localStorageService.SetItem("user", User);
+            NotifyStateChanged();
+
         }
 
         public async Task Logout()
@@ -47,6 +54,10 @@ namespace CryptocurrencyMarketMonitoring.Client.Services
             User = null;
             await _localStorageService.RemoveItem("user");
             _navigationManager.NavigateTo("");
+            NotifyStateChanged();
         }
+
+        private void NotifyStateChanged() => OnChange?.Invoke();
+
     }
 }

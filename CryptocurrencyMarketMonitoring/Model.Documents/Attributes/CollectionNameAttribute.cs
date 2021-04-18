@@ -4,22 +4,19 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CryptocurrencyMarketMonitoring.Model.Attributes
+namespace CryptocurrencyMarketMonitoring.Model.Documents.Attributes
 {
-
     [AttributeUsage(AttributeTargets.Class, Inherited = true)]
-    public class ConnectionNameAttribute : Attribute
+    public class CollectionNameAttribute : Attribute
     {
         /// <summary>
         /// Initializes a new instance of the CollectionName class attribute with the desired name.
         /// </summary>
         /// <param name="value">Name of the collection.</param>
-        public ConnectionNameAttribute(string value)
+        public CollectionNameAttribute(string value)
         {
-
             if (string.IsNullOrWhiteSpace(value))
-                throw new ArgumentException("Empty connection name is not allowed", "value");
-
+                throw new ArgumentException("Empty collection name is not allowed", nameof(value));
             Name = value;
         }
 
@@ -28,5 +25,6 @@ namespace CryptocurrencyMarketMonitoring.Model.Attributes
         /// </summary>
         /// <value>The name of the collection.</value>
         public virtual string Name { get; private set; }
+
     }
 }

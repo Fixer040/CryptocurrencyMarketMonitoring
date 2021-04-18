@@ -12,6 +12,7 @@ namespace CryptocurrencyMarketMonitoring.Abstractions
         public string Audience { get; set; }
         public int RestoreTokenDurationMin { get; set; }
         public int ExpiresDurationMin { get; set; }
-        public string Secret { get; set; }
+        public string Private { get; set; }
+        public string Public { get; set; }
     }
 }

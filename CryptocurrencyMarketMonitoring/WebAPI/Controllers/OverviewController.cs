@@ -11,9 +11,9 @@ namespace CryptocurrencyMarketMonitoring.Server.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class CryptocurrencyOverviewController : ControllerBase
+    public class OverviewController : ControllerBase
     {
-        public CryptocurrencyOverviewController(ILogger<CryptocurrencyOverviewController> logger, ICryptocurrencyOverviewService cryptocurrencyOverviewService)
+        public OverviewController(ILogger<OverviewController> logger, IOverviewService cryptocurrencyOverviewService)
         {
             _logger = logger;
             _cryptocurrencyOverviewService = cryptocurrencyOverviewService;
@@ -25,7 +25,7 @@ namespace CryptocurrencyMarketMonitoring.Server.Controllers
             return Ok(await _cryptocurrencyOverviewService.GetCryptocurrencyListAsync());
         }
 
-        private readonly ILogger<CryptocurrencyOverviewController> _logger;
-        private ICryptocurrencyOverviewService _cryptocurrencyOverviewService;
+        private readonly ILogger<OverviewController> _logger;
+        private IOverviewService _cryptocurrencyOverviewService;
     }
 }

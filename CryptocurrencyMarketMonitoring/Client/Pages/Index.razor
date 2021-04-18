@@ -7,7 +7,7 @@
 @using Microsoft.AspNetCore.SignalR.Client
 @using System.Collections.Generic;
 @using Microsoft.Extensions.DependencyInjection;
-@using CryptocurrencyMarketMonitoring.Client.Services; 
+@using CryptocurrencyMarketMonitoring.Client.Services;
 @implements IAsyncDisposable
 
 
@@ -19,33 +19,33 @@
 @inject IHttpService Http
 
 
-<div class="text-center justify-content-center">
+<div class=" px-4 text-center justify-content-center w-75 m-auto">
     <h1 class="text-capitalize text-dark">Cryptocurrency prices today</h1>
 
     <SfGrid @ref="Grid" DataSource="@Cryptocurrencies" AllowSorting="true" AllowPaging="true">
         <GridPageSettings PageSize="100"></GridPageSettings>
         <GridSortSettings>
             <GridSortColumns>
-                <GridSortColumn Field="@nameof(CryptocurrencyOverviewDto.Ranking)" Direction="SortDirection.Ascending"></GridSortColumn>
+                <GridSortColumn Field="@nameof(OverviewDto.Ranking)" Direction="SortDirection.Ascending"></GridSortColumn>
             </GridSortColumns>
         </GridSortSettings>
         <GridColumns>
-            <GridColumn Field="@nameof(CryptocurrencyOverviewDto.Ranking)" HeaderText="Ranking" TextAlign="TextAlign.Center" />
-            <GridColumn HeaderText="" TextAlign="TextAlign.Center" Width="45" AllowSorting="false" >
+            <GridColumn Field="@nameof(OverviewDto.Ranking)" HeaderText="Ranking" TextAlign="TextAlign.Center" />
+            <GridColumn HeaderText="" TextAlign="TextAlign.Center" Width="45" AllowSorting="false">
                 <Template>
                     @{
-                        var employee = (context as CryptocurrencyOverviewDto);
+                        var employee = (context as OverviewDto);
                         <div class="image">
                             <img width="30" height="30" src="@employee.IconSrc" />
                         </div>
                     }
                 </Template>
             </GridColumn>
-            <GridColumn Field="@nameof(CryptocurrencyOverviewDto.Name)" HeaderText="Name" TextAlign="TextAlign.Center"  />
-            <GridColumn Field="@nameof(CryptocurrencyOverviewDto.Ticker)" HeaderText="Symbol" TextAlign="TextAlign.Center" >
+            <GridColumn Field="@nameof(OverviewDto.Name)" HeaderText="Name" TextAlign="TextAlign.Center" />
+            <GridColumn Field="@nameof(OverviewDto.Ticker)" HeaderText="Symbol" TextAlign="TextAlign.Center">
                 <Template>
                     @{
-                        var ticker = ((CryptocurrencyOverviewDto)context).Ticker;
+                        var ticker = ((OverviewDto)context).Ticker;
                         var link = $"/detail/{ticker}";
                         <div>
                             <NavLink href="@link">@ticker</NavLink>
@@ -53,70 +53,69 @@
                     }
                 </Template>
             </GridColumn>
-            <GridColumn Field="@nameof(CryptocurrencyOverviewDto.PriceUSD)" HeaderText="Price" TextAlign="TextAlign.Center" >
+            <GridColumn Field="@nameof(OverviewDto.PriceUSD)" HeaderText="Price" TextAlign="TextAlign.Center">
                 <Template>
                     @{
-                        var dto = (CryptocurrencyOverviewDto)context;
+                        var dto = (OverviewDto)context;
                         var priceString = dto.PriceUSD < 1 ? dto.PriceUSD.ToString("$###,###,##0.0000") : dto.PriceUSD.ToString("$###,###,##0.00");
 
                         <div>@priceString</div>
                     }
                 </Template>
             </GridColumn>
-            <GridColumn Field="@nameof(CryptocurrencyOverviewDto.LastDayPercentageMovement)" HeaderText="24h" TextAlign="TextAlign.Center" >
+            <GridColumn Field="@nameof(OverviewDto.LastDayPercentageMovement)" HeaderText="24h" TextAlign="TextAlign.Center">
                 <Template>
                     @{
-                        <div class="@(((CryptocurrencyOverviewDto)context).LastDayPercentageMovement < 0 ? "text-danger" : "text-success")">
-                            @(((CryptocurrencyOverviewDto)context).LastDayPercentageMovement.ToString("0.00%"))
+                        <div class="@(((OverviewDto)context).LastDayPercentageMovement < 0 ? "text-danger" : "text-success")">
+                            @(((OverviewDto)context).LastDayPercentageMovement.ToString("0.00%"))
                         </div>
                     }
                 </Template>
             </GridColumn>
-            <GridColumn Field="@nameof(CryptocurrencyOverviewDto.LastWeekPercentageMovement)" HeaderText="7d" TextAlign="TextAlign.Center" >
+            <GridColumn Field="@nameof(OverviewDto.LastWeekPercentageMovement)" HeaderText="7d" TextAlign="TextAlign.Center">
                 <Template>
                     @{
-                        <div class="@(((CryptocurrencyOverviewDto)context).LastWeekPercentageMovement < 0 ? "text-danger" : "text-success")">
-                            @(((CryptocurrencyOverviewDto)context).LastWeekPercentageMovement.ToString("0.00%"))
+                        <div class="@(((OverviewDto)context).LastWeekPercentageMovement < 0 ? "text-danger" : "text-success")">
+                            @(((OverviewDto)context).LastWeekPercentageMovement.ToString("0.00%"))
                         </div>
                     }
                 </Template>
             </GridColumn>
-            <GridColumn Field="@nameof(CryptocurrencyOverviewDto.VolumeUSD)" HeaderText="Volume" TextAlign="TextAlign.Center" Format="$###,###,###,###,###,###" />
-            <GridColumn Field="@nameof(CryptocurrencyOverviewDto.MarketCapUSD)" HeaderText="Market cap" TextAlign="TextAlign.Center" Format="$###,###,###,###,###,###" />
+            <GridColumn Field="@nameof(OverviewDto.VolumeUSD)" HeaderText="Volume" TextAlign="TextAlign.Center" Format="$###,###,###,###,###,###" />
+            <GridColumn Field="@nameof(OverviewDto.MarketCapUSD)" HeaderText="Market cap" TextAlign="TextAlign.Center" Format="$###,###,###,###,###,###" />
 
 
         </GridColumns>
     </SfGrid>
 </div>
 
+<div class="mb-4"></div>
+
+
 @code{
-    public List<CryptocurrencyOverviewDto> Cryptocurrencies { get; set; }
+    public List<OverviewDto> Cryptocurrencies { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
-        base.OnInitialized();
-
-        var cryptocurrencyList = await Http.Get<CryptocurrencyOverviewDto[]>("CryptocurrencyOverview/list");
+        var cryptocurrencyList = await Http.Get<OverviewDto[]>("Overview/list");
         //var cryptocurrencyList = await Http.GetFromJsonAsync<CryptocurrencyOverviewDto[]>("CryptocurrencyOverview/list");
 
-        Cryptocurrencies = new List<CryptocurrencyOverviewDto>(cryptocurrencyList);
-
-        Grid.Refresh();
+        Cryptocurrencies = new List<OverviewDto>(cryptocurrencyList);
 
         _updateHubConnection = new HubConnectionBuilder().AddJsonProtocol(options =>
         {
             options.PayloadSerializerOptions.PropertyNamingPolicy = null;
         }).WithUrl(NavigationManager.ToAbsoluteUri("/overview-update")).Build();
 
-
-
-        _updateHubConnection.On<IEnumerable<CryptocurrencyOverviewUpdateDto>>("SendUpdateAsync", (cryptocurrencyListUpdates) =>
+        _updateHubConnection.On<IEnumerable<OverviewUpdateDto>>("ReceiveUpdate", (updates) =>
         {
-            DoGridUpdate(cryptocurrencyListUpdates);
+            DoGridUpdate(updates);
         });
+
 
         await _updateHubConnection.StartAsync();
 
+        await base.OnInitializedAsync();
     }
 
 
@@ -125,20 +124,20 @@
         await _updateHubConnection.DisposeAsync();
     }
 
-    private void DoGridUpdate(IEnumerable<CryptocurrencyOverviewUpdateDto> cryptocurrencyListUpdates)
+    private void DoGridUpdate(IEnumerable<OverviewUpdateDto> cryptocurrencyListUpdates)
     {
         foreach (var update in cryptocurrencyListUpdates)
         {
             switch (update.UpdateType)
             {
-                case CryptocurrencyOverviewUpdateType.Create:
+                case OverviewUpdateType.Create:
                     Cryptocurrencies.Add(update.Data);
                     break;
-                case CryptocurrencyOverviewUpdateType.Delete:
-                    Cryptocurrencies.Remove(Cryptocurrencies.FirstOrDefault(x => x.Ticker == update.Data.Ticker));
+                case OverviewUpdateType.Delete:
+                    Cryptocurrencies.Remove(Cryptocurrencies.FirstOrDefault(x => x.Name == update.Data.Name));
                     break;
-                case CryptocurrencyOverviewUpdateType.Update:
-                    UpdateCryptocurrencyOverviewData(Cryptocurrencies.FirstOrDefault(x => x.Ticker == update.Data.Ticker), update);
+                case OverviewUpdateType.Update:
+                    UpdateCryptocurrencyOverviewData(Cryptocurrencies.FirstOrDefault(x => x.Name == update.Data.Name), update);
                     break;
                 default:
                     continue;
@@ -148,7 +147,7 @@
         Grid.Refresh();
     }
 
-    private void UpdateCryptocurrencyOverviewData(CryptocurrencyOverviewDto overview, CryptocurrencyOverviewUpdateDto update)
+    private void UpdateCryptocurrencyOverviewData(OverviewDto overview, OverviewUpdateDto update)
     {
         if (overview.Ranking != update.Data.Ranking)
             overview.Ranking = update.Data.Ranking;
@@ -170,5 +169,5 @@
     }
 
     private HubConnection _updateHubConnection;
-    public SfGrid<CryptocurrencyOverviewDto> Grid;
+    public SfGrid<OverviewDto> Grid;
 }

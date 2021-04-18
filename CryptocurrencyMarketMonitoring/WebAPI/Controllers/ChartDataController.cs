@@ -13,7 +13,7 @@ namespace CryptocurrencyMarketMonitoring.Server.Controllers
     [Route("[controller]")]
     public class ChartDataController : ControllerBase
     {
-        public ChartDataController(ILogger<CryptocurrencyOverviewController> logger, IChartDataService chartDataService)
+        public ChartDataController(ILogger<OverviewController> logger, IChartDataService chartDataService)
         {
             _logger = logger;
             _chartDataService = chartDataService;
@@ -26,7 +26,7 @@ namespace CryptocurrencyMarketMonitoring.Server.Controllers
             return Ok(data);
         }
 
-        private readonly ILogger<CryptocurrencyOverviewController> _logger;
+        private readonly ILogger<OverviewController> _logger;
         private IChartDataService _chartDataService;
     }
 }

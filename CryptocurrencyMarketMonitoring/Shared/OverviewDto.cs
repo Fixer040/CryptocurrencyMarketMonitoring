@@ -5,7 +5,7 @@ using System.Text;
 
 namespace CryptocurrencyMarketMonitoring.Shared
 {
-    public class CryptocurrencyOverviewDto : INotifyPropertyChanged
+    public class OverviewDto : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
 

@@ -1,5 +1,7 @@
-﻿using CryptocurrencyMarketMonitoring.Model.Attributes;
+﻿using CryptocurrencyMarketMonitoring.Abstractions;
 using CryptocurrencyMarketMonitoring.Model.Documents;
+using CryptocurrencyMarketMonitoring.Model.Documents.Attributes;
+using Microsoft.Extensions.Configuration;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
@@ -105,8 +107,8 @@ namespace CryptocurrencyMarketMonitoring.Model.Repository
             // Check to see if the object (inherited from Entity) has a CollectionName attribute
             var att = typeof(TDocument).GetTypeInfo().GetCustomAttribute(typeof(CollectionNameAttribute));
             return att != null
-                ? new string[] { ((CollectionNameAttribute)att).Name, ((CollectionNameAttribute)att).NameTemp }
-                : new string[] { typeof(TDocument).Name, string.Empty };
+                ? new string[] { ((CollectionNameAttribute)att).Name}
+                : new string[] { typeof(TDocument).Name };
         }
 
         /// <summary>
@@ -118,14 +120,12 @@ namespace CryptocurrencyMarketMonitoring.Model.Repository
         {
             Type entitytype = typeof(TDocument);
             string collectionName;
-            string collectionNameTemp;
             // Check to see if the object (inherited from Entity) has a CollectionName attribute
             var att = entitytype.GetTypeInfo().GetCustomAttribute(typeof(CollectionNameAttribute));
             if (att != null)
             {
                 // It does! Return the value specified by the CollectionName attribute
                 collectionName = ((CollectionNameAttribute)att).Name;
-                collectionNameTemp = ((CollectionNameAttribute)att).NameTemp;
             }
             else
             {
@@ -138,10 +138,9 @@ namespace CryptocurrencyMarketMonitoring.Model.Repository
                 //    }
                 //}
                 collectionName = entitytype.Name;
-                collectionNameTemp = string.Empty;
             }
 
-            return new string[] { collectionName, collectionNameTemp };
+            return new string[] { collectionName};
         }
 
 
@@ -224,8 +223,7 @@ namespace CryptocurrencyMarketMonitoring.Model.Repository
         /// <returns>Returns the default connectionstring from the appsettings.json file.</returns>
         internal static string GetDefaultConnectionString()
         {
-            return string.Empty;
-            //return DIContainer.Configuration.GetConnectionString(GetConnectionName());
+            return DIContainer.Configuration.GetConnectionString(GetConnectionName());
         }
 
         internal static string GetSessionName()
