@@ -19,10 +19,17 @@ namespace CryptocurrencyMarketMonitoring.Server.Controllers
             _cryptocurrencyOverviewService = cryptocurrencyOverviewService;
         }
 
-        [HttpGet("list")]
-        public async Task<IActionResult> GetCryptocurrencyList()
+
+        [HttpGet("currencies")]
+        public IActionResult GetCryptocurrencyList()
         {
-            return Ok(await _cryptocurrencyOverviewService.GetCryptocurrencyListAsync());
+            return Ok(_cryptocurrencyOverviewService.GetSupportedCurrencies());
+        }
+
+        [HttpGet("overview/{currency}")]
+        public IActionResult GetCryptocurrencyList(string currency = "usd")
+        {
+            return Ok(_cryptocurrencyOverviewService.GetOverview(currency));
         }
 
         private readonly ILogger<OverviewController> _logger;

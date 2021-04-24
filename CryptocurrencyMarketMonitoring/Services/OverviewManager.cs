@@ -24,15 +24,23 @@ namespace CryptocurrencyMarketMonitoring.Services
     public class OverviewManager : BackgroundService, IOverviewManager
     {
 
-        public OverviewManager(IHubContext<OverviewUpdateHub, IOverviewUpdateClient> updateHub, ICoinGeckoClient coinGeckoClient, IBinanceClient binanceClient)
+        public OverviewManager(IHubContext<OverviewUpdateHub, IOverviewUpdateClient> updateHub, ICoinGeckoClient coinGeckoClient, IBinanceClient binanceClient, IOverviewSubscriptionManager subscriptionManager)
         {
             _updateHub = updateHub;
             _binanceClient = binanceClient;
             _coinGeckoClient = coinGeckoClient;
+            _subscriptionManager = subscriptionManager;
         }
 
         public override async Task StartAsync(CancellationToken cancellationToken)
         {
+            var supportedCurrencies = await _coinGeckoClient.SimpleClient.GetSupportedVsCurrencies();
+
+            _supportedCurrencies = supportedCurrencies.Select(x => x.ToUpperInvariant()).Take(5).ToList();
+
+            if (!_supportedCurrencies.Contains("USD"))
+                _supportedCurrencies.Add("USD");
+
             await UpdateDataAsync(sendUpdate: false);
             _waitHandle.Set();
 
@@ -56,12 +64,25 @@ namespace CryptocurrencyMarketMonitoring.Services
             }
         }
 
-
-        public async Task<IEnumerable<OverviewDto>> GetCryptocurrencyOverviewAllAsync()
+        public IEnumerable<string> GetSupportedCurrencies()
         {
             _waitHandle.WaitOne();
 
-            return _currentCryptocurrencyOverviewData.Values.OrderBy(x => x.Ranking).ToList();
+            return _supportedCurrencies;
+        }
+
+        public IEnumerable<OverviewDto> GetOverview(string currency)
+        {
+            _waitHandle.WaitOne();
+
+            if (_overviewData.TryGetValue(currency, out var currencyData))
+            {
+                var retval = currencyData.Values.OrderBy(x => x.Ranking).ToList();
+
+                return retval;
+            }
+
+            return null;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -76,46 +97,55 @@ namespace CryptocurrencyMarketMonitoring.Services
 
         private async Task UpdateDataAsync(bool sendUpdate = false)
         {
-            var coinMarkets = await _coinGeckoClient.CoinsClient.GetCoinMarkets("usd", Array.Empty<string>(), "market_cap_desc", 250, 1, true, "7d,24h", null);
-
-            var oldValues = _currentCryptocurrencyOverviewData.Values.Select(x => x.DeepClone()).ToList();
-            var newValues = new List<OverviewDto>();
-            foreach (var coinMarket in coinMarkets)
+            foreach (var supportedCurrency in _supportedCurrencies)
             {
-                var cryptocurrency = new OverviewDto()
+                if (!_overviewData.TryGetValue(supportedCurrency, out var supportedCurrencyData))
                 {
-                    Ranking = coinMarket.MarketCapRank ?? 0,
-                    Name = coinMarket.Name,
-                    Ticker = coinMarket.Symbol.ToUpper(),
-                    LastDayPercentageMovement = coinMarket.PriceChangePercentage24HInCurrency / 100 ?? 0,
-                    LastWeekPercentageMovement = coinMarket.PriceChangePercentage7DInCurrency / 100 ?? 0,
-                    PriceUSD = coinMarket.CurrentPrice ?? 0,
-                    VolumeUSD = coinMarket.TotalVolume ?? 0,
-                    MarketCapUSD = coinMarket.MarketCap ?? 0,
-                    IconSrc = coinMarket.Image
-                };
-
-                _currentCryptocurrencyOverviewData.AddOrUpdate(cryptocurrency.Name, cryptocurrency, (key, value) => cryptocurrency);
-                newValues.Add(cryptocurrency);
-            }
-
-            foreach (var key in _currentCryptocurrencyOverviewData.Keys)
-            {
-                if (!newValues.Any(x => x.Name == key))
-                {
-                    _currentCryptocurrencyOverviewData.TryRemove(key, out _);
+                    supportedCurrencyData = new ConcurrentDictionary<string, OverviewDto>();
+                    _overviewData.TryAdd(supportedCurrency, supportedCurrencyData);
                 }
+
+                var coinMarkets = await _coinGeckoClient.CoinsClient.GetCoinMarkets(supportedCurrency, Array.Empty<string>(), "market_cap_desc", 250, 1, true, "7d,24h", null);
+
+                var oldValues = supportedCurrencyData.Values.Select(x => x.DeepClone()).ToList();
+                var newValues = new List<OverviewDto>();
+                foreach (var coinMarket in coinMarkets)
+                {
+                    var cryptocurrency = new OverviewDto()
+                    {
+                        Ranking = coinMarket.MarketCapRank ?? 0,
+                        Name = coinMarket.Name,
+                        Ticker = coinMarket.Symbol.ToUpper(),
+                        LastDayPercentageMovement = coinMarket.PriceChangePercentage24HInCurrency / 100 ?? 0,
+                        LastWeekPercentageMovement = coinMarket.PriceChangePercentage7DInCurrency / 100 ?? 0,
+                        Price = coinMarket.CurrentPrice ?? 0,
+                        Volume = coinMarket.TotalVolume ?? 0,
+                        MarketCap = coinMarket.MarketCap ?? 0,
+                        IconSrc = coinMarket.Image
+                    };
+
+                    supportedCurrencyData.AddOrUpdate(cryptocurrency.Name, cryptocurrency, (key, value) => cryptocurrency);
+                    newValues.Add(cryptocurrency);
+                }
+
+                foreach (var key in supportedCurrencyData.Keys)
+                {
+                    if (!newValues.Any(x => x.Name == key))
+                    {
+                        supportedCurrencyData.TryRemove(key, out _);
+                    }
+                }
+
+                if (sendUpdate)
+                {
+                    _ = SendOverviewUpdatesToClients(supportedCurrency, oldValues, newValues);
+                }
+
             }
 
-            if (sendUpdate)
-            {
-                var updates = GetCryptocurrencyOverviewUpdates(oldValues, newValues);
-
-                await _updateHub.Clients.All.ReceiveUpdate(updates);
-            }
         }
 
-        private IEnumerable<OverviewUpdateDto> GetCryptocurrencyOverviewUpdates(IEnumerable<OverviewDto> oldValues, IEnumerable<OverviewDto> newValues)
+        private async Task SendOverviewUpdatesToClients(string currency, IEnumerable<OverviewDto> oldValues, IEnumerable<OverviewDto> newValues)
         {
             var updates = new List<OverviewUpdateDto>();
             foreach (var oldValue in oldValues)
@@ -128,7 +158,7 @@ namespace CryptocurrencyMarketMonitoring.Services
                     var compareLogic = new CompareLogic();
                     var comparisonResult = compareLogic.Compare(oldValue, matchingNewValue);
 
-                    if (!comparisonResult.AreEqual)
+                    if (comparisonResult.AreEqual)
                     {
                         update.UpdateType = OverviewUpdateType.None;
                     }
@@ -159,7 +189,15 @@ namespace CryptocurrencyMarketMonitoring.Services
                 };
             }
 
-            return updates;
+            var subscriptions = _subscriptionManager.GetClientSubscriptions();
+
+            foreach (var subscription in subscriptions)
+            { 
+                if (subscription.Value == currency)
+                {
+                    await _updateHub.Clients.Client(subscription.Key).ReceiveUpdate(updates);
+                }
+            }
         }
 
         public override void Dispose()
@@ -169,7 +207,7 @@ namespace CryptocurrencyMarketMonitoring.Services
         }
 
 
-        private ConcurrentDictionary<string, OverviewDto> _currentCryptocurrencyOverviewData = new();
+        private ConcurrentDictionary<string, ConcurrentDictionary<string, OverviewDto>> _overviewData = new();
         private readonly IBinanceClient _binanceClient;
         private readonly ICoinGeckoClient _coinGeckoClient;
         private int _updateCyclePeriod = 60000;
@@ -177,5 +215,7 @@ namespace CryptocurrencyMarketMonitoring.Services
         private EventWaitHandle _waitHandle = new(false, EventResetMode.ManualReset);
         private Task _executingTask;
         private readonly CancellationTokenSource _stoppingCts = new();
+        private List<string> _supportedCurrencies;
+        IOverviewSubscriptionManager _subscriptionManager;
     }
 }

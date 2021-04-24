@@ -1,4 +1,5 @@
-﻿using CryptocurrencyMarketMonitoring.Abstractions.Services;
+﻿using CryptocurrencyMarketMonitoring.Abstractions.Managers;
+using CryptocurrencyMarketMonitoring.Abstractions.Services;
 using CryptocurrencyMarketMonitoring.Shared;
 using Microsoft.AspNetCore.SignalR;
 using System;
@@ -9,10 +10,17 @@ namespace CryptocurrencyMarketMonitoring.SignalR.Hubs
 {
     public class OverviewUpdateHub : Hub<IOverviewUpdateClient>
     {
-        public async Task SendUpdateAsync(IEnumerable<OverviewUpdateDto> updates)
+        public OverviewUpdateHub(IOverviewSubscriptionManager subscriptionManager)
         {
-            await Clients.Others.ReceiveUpdate(updates);
+            _subscriptionManager = subscriptionManager;
         }
 
+        public void Subscribe(string clientId, string currency)
+        {
+            _subscriptionManager.Subscribe(clientId, currency);
+        }
+
+
+        IOverviewSubscriptionManager _subscriptionManager;
     }
 }

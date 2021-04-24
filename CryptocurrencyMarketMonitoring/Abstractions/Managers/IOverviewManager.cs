@@ -10,6 +10,7 @@ namespace CryptocurrencyMarketMonitoring.Abstractions.Managers
 {
     public interface IOverviewManager : IHostedService, IDisposable
     {
-        Task<IEnumerable<OverviewDto>> GetCryptocurrencyOverviewAllAsync();
+        IEnumerable<string> GetSupportedCurrencies();
+        IEnumerable<OverviewDto> GetOverview(string currency);
     }
 }

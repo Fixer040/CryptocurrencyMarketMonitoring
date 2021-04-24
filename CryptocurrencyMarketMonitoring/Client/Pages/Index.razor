@@ -2,27 +2,28 @@
 @using CryptocurrencyMarketMonitoring.Shared
 @using System.Collections.ObjectModel
 @using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.DropDowns;
 @using System.ComponentModel
 @using System.Linq;
 @using Microsoft.AspNetCore.SignalR.Client
 @using System.Collections.Generic;
 @using Microsoft.Extensions.DependencyInjection;
 @using CryptocurrencyMarketMonitoring.Client.Services;
+
 @implements IAsyncDisposable
 
 
-
 @inject NavigationManager NavigationManager
-
-
-
 @inject IHttpService HttpService
 
 
 <div class=" px-4 text-center justify-content-center w-75 m-auto">
-    <h1 class="text-capitalize text-dark">Cryptocurrency prices today</h1>
+    <h1>Cryptocurrency Prices by Market Cap</h1>
 
-    <SfGrid @ref="Grid" DataSource="@Cryptocurrencies" AllowSorting="true" AllowPaging="true">
+    <div class="d-flex justify-content-start">
+        <SfComboBox TValue="string" TItem="string" DataSource="@SupportedCurrencies" Value="@SelectedCurrency" ValueChanged="@SelectedCurrencyChanged" Placeholder="USD" CssClass="w-25 justify-content-start"></SfComboBox>
+    </div>
+    <SfGrid DataSource="@Cryptocurrencies" AllowSorting="true" AllowPaging="true">
         <GridPageSettings PageSize="100"></GridPageSettings>
         <GridSortSettings>
             <GridSortColumns>
@@ -53,11 +54,11 @@
                     }
                 </Template>
             </GridColumn>
-            <GridColumn Field="@nameof(OverviewDto.PriceUSD)" HeaderText="Price" TextAlign="TextAlign.Center">
+            <GridColumn Field="@nameof(OverviewDto.Price)" HeaderText="Price" TextAlign="TextAlign.Center">
                 <Template>
                     @{
                         var dto = (OverviewDto)context;
-                        var priceString = dto.PriceUSD < 1 ? dto.PriceUSD.ToString("$###,###,##0.0000") : dto.PriceUSD.ToString("$###,###,##0.00");
+                        var priceString = dto.Price < 1 ? dto.Price.ToString($"{ActiveCurrency} ###,###,##0.0000000000") : dto.Price.ToString($"{ActiveCurrency} ###,###,##0.00");
 
                         <div>@priceString</div>
                     }
@@ -81,10 +82,22 @@
                     }
                 </Template>
             </GridColumn>
-            <GridColumn Field="@nameof(OverviewDto.VolumeUSD)" HeaderText="Volume" TextAlign="TextAlign.Center" Format="$###,###,###,###,###,###" />
-            <GridColumn Field="@nameof(OverviewDto.MarketCapUSD)" HeaderText="Market cap" TextAlign="TextAlign.Center" Format="$###,###,###,###,###,###" />
-
-
+            <GridColumn Field="@nameof(OverviewDto.Volume)" HeaderText="Volume" TextAlign="TextAlign.Center">
+                <Template>
+                    @{
+                        var dto = (OverviewDto)context;
+                        <div>@dto.Volume.ToString($"{ActiveCurrency} ###,###,###,###,###,###")</div>
+                    }
+                </Template>
+            </GridColumn>
+            <GridColumn Field="@nameof(OverviewDto.MarketCap)" HeaderText="Market cap" TextAlign="TextAlign.Center">
+                <Template>
+                    @{
+                        var dto = (OverviewDto)context;
+                        <div>@dto.MarketCap.ToString($"{ActiveCurrency} ###,###,###,###,###,###")</div>
+                    }
+                </Template>
+            </GridColumn>
         </GridColumns>
     </SfGrid>
 </div>
@@ -94,13 +107,16 @@
 
 @code{
     public List<OverviewDto> Cryptocurrencies { get; set; }
+    public List<string> SupportedCurrencies { get; set; }
+    public string SelectedCurrency { get; set; }
+    public string ActiveCurrency { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
-        var cryptocurrencyList = await HttpService.Get<OverviewDto[]>("Overview/list");
-        //var cryptocurrencyList = await Http.GetFromJsonAsync<CryptocurrencyOverviewDto[]>("CryptocurrencyOverview/list");
-
-        Cryptocurrencies = new List<OverviewDto>(cryptocurrencyList);
+        SupportedCurrencies = await HttpService.Get<List<string>>("Overview/currencies");
+        SelectedCurrency = SupportedCurrencies.FirstOrDefault(x => x == "USD");
+        ActiveCurrency = SelectedCurrency;
+        Cryptocurrencies = await HttpService.Get<List<OverviewDto>>($"Overview/overview/{SelectedCurrency}");
 
         _updateHubConnection = new HubConnectionBuilder().AddJsonProtocol(options =>
         {
@@ -115,12 +131,21 @@
 
         await _updateHubConnection.StartAsync();
 
+        await _updateHubConnection.SendAsync("Subscribe", _updateHubConnection.ConnectionId, SelectedCurrency);
+
+
         await base.OnInitializedAsync();
     }
 
+    public void SelectedCurrencyChanged(string value)
+    {
+        SelectedCurrency = value ?? "USD";
+        _ = ReloadGridCurrencyAsync(value);
+    }
 
     public async ValueTask DisposeAsync()
     {
+        await _updateHubConnection.SendAsync("Unsubscribe", _updateHubConnection.ConnectionId);
         await _updateHubConnection.DisposeAsync();
     }
 
@@ -144,7 +169,7 @@
             }
         }
 
-        Grid.Refresh();
+        StateHasChanged();
     }
 
     private void UpdateCryptocurrencyOverviewData(OverviewDto overview, OverviewUpdateDto update)
@@ -158,16 +183,23 @@
         if (overview.LastWeekPercentageMovement != update.Data.LastWeekPercentageMovement)
             overview.LastWeekPercentageMovement = update.Data.LastWeekPercentageMovement;
 
-        if (overview.MarketCapUSD != update.Data.MarketCapUSD)
-            overview.MarketCapUSD = update.Data.MarketCapUSD;
+        if (overview.MarketCap != update.Data.MarketCap)
+            overview.MarketCap = update.Data.MarketCap;
 
-        if (overview.PriceUSD != update.Data.PriceUSD)
-            overview.PriceUSD = update.Data.PriceUSD;
+        if (overview.Price != update.Data.Price)
+            overview.Price = update.Data.Price;
 
-        if (overview.VolumeUSD != update.Data.VolumeUSD)
-            overview.VolumeUSD = update.Data.VolumeUSD;
+        if (overview.Volume != update.Data.Volume)
+            overview.Volume = update.Data.Volume;
+    }
+
+    private async Task ReloadGridCurrencyAsync(string newCurrency)
+    {
+        Cryptocurrencies = await HttpService.Get<List<OverviewDto>>($"Overview/overview/{newCurrency ?? "USD"}");
+        await _updateHubConnection.SendAsync("Subscribe", _updateHubConnection.ConnectionId, SelectedCurrency);
+        StateHasChanged();
+        ActiveCurrency = SelectedCurrency;
     }
 
     private HubConnection _updateHubConnection;
-    public SfGrid<OverviewDto> Grid;
 }

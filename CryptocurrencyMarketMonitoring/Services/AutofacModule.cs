@@ -27,7 +27,7 @@ namespace CryptocurrencyMarketMonitoring.Services
             builder.RegisterType<UserService>().As<IUserService>();
             builder.RegisterType<BinanceClient>().As<IBinanceClient>().SingleInstance();
             builder.RegisterType<PasswordHasherService>().As<IPasswordHasherService>();
-
+            builder.RegisterType<OverviewSubscriptionManager>().As<IOverviewSubscriptionManager>().SingleInstance();
         }
     }
 }

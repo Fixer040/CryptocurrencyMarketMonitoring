@@ -12,11 +12,11 @@ namespace CryptocurrencyMarketMonitoring.Shared
         public long Ranking { get; set; }
         public string Name { get; set; }
         public string Ticker { get; set; }
-        public decimal PriceUSD { get; set; }
+        public decimal Price { get; set; }
         public decimal LastDayPercentageMovement { get; set; }
         public decimal LastWeekPercentageMovement { get; set; }
-        public decimal MarketCapUSD { get; set; }
-        public decimal VolumeUSD { get; set; }
+        public decimal MarketCap { get; set; }
+        public decimal Volume { get; set; }
         public Uri IconSrc { get; set; }
 
     }

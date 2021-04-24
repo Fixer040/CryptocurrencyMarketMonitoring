@@ -42,11 +42,7 @@ namespace CryptocurrencyMarketMonitoring.Services
 
             var needsUpgrade = iterations != _options.Iterations;
 
-            using (var algorithm = new Rfc2898DeriveBytes(
-              password,
-              salt,
-              iterations,
-              HashAlgorithmName.SHA256))
+            using (var algorithm = new Rfc2898DeriveBytes(password, salt, iterations, HashAlgorithmName.SHA256))
             {
                 var keyToCheck = algorithm.GetBytes(_keySize);
 
