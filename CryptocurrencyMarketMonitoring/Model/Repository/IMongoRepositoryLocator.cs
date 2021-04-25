@@ -348,10 +348,10 @@ namespace CryptocurrencyMarketMonitoring.Model.Repository
         Task<IEnumerable<TEntity>> FindAsync<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : IMongoDocumentBase;
         Task<IEnumerable<TEntity>> FindAsync<TEntity>(Expression<Func<TEntity, bool>> filter, Expression<Func<TEntity, TEntity>> projection) where TEntity : IMongoDocumentBase;
         Task<IEnumerable<TEntity>> FindAsync<TEntity>(Expression<Func<TEntity, bool>> filter, Expression<Func<TEntity, object>> order, int? pageIndex, int? size) where TEntity : IMongoDocumentBase;
-        Task<IEnumerable<TEntity>> FindAsync<TEntity>(Expression<Func<TEntity, bool>> filter, Expression<Func<TEntity, object>> order, int? pageIndex, int? size, bool isDescending) where TEntity : IMongoDocumentBase;
+        Task<IEnumerable<TEntity>> FindAsync<TEntity>(Expression<Func<TEntity, bool>> filter, Expression<Func<TEntity, object>> order, int? pageIndex, int? size, bool isDescending, params string[] collectionNameParams) where TEntity : IMongoDocumentBase;
         Task<IEnumerable<TEntity>> FindAsync<TEntity>(Expression<Func<TEntity, bool>> filter, Expression<Func<TEntity, object>> order, int? pageIndex, int? size, bool isDescending, Expression<Func<TEntity, TEntity>> projection) where TEntity : IMongoDocumentBase;
 
-        Task<IEnumerable<TEntity>> FindAsync<TEntity>(Expression<Func<TEntity, bool>> filter, int? pageIndex, int? size) where TEntity : IMongoDocumentBase;
+        Task<IEnumerable<TEntity>> FindAsync<TEntity>(Expression<Func<TEntity, bool>> filter, int? pageIndex, int? size, params string[] collectionNameParams) where TEntity : IMongoDocumentBase;
 
         Task<TEntity> FirstAsync<TEntity>() where TEntity : IMongoDocumentBase;
         Task<TEntity> FirstAsync<TEntity>(Expression<Func<TEntity, TEntity>> projection) where TEntity : IMongoDocumentBase;
@@ -360,7 +360,7 @@ namespace CryptocurrencyMarketMonitoring.Model.Repository
         Task<TEntity> FirstAsync<TEntity>(Expression<Func<TEntity, bool>> filter, Expression<Func<TEntity, object>> order, bool isDescending) where TEntity : IMongoDocumentBase;
         Task<TEntity> GetAsync<TEntity>(ObjectId id) where TEntity : IMongoDocumentBase;
         Task<TEntity> GetAsync<TEntity>(ObjectId id, Expression<Func<TEntity, TEntity>> projection) where TEntity : IMongoDocumentBase;
-        Task InsertAsync<TEntity>(IEnumerable<TEntity> entities) where TEntity : IMongoDocumentBase;
+        Task InsertAsync<TEntity>(IEnumerable<TEntity> entities, params string[] collectionNameParams) where TEntity : IMongoDocumentBase;
         Task InsertAsync<TEntity>(TEntity entity) where TEntity : IMongoDocumentBase;
         Task<TEntity> LastAsync<TEntity>() where TEntity : IMongoDocumentBase;
         Task<TEntity> LastAsync<TEntity>(Expression<Func<TEntity, TEntity>> projection) where TEntity : IMongoDocumentBase;

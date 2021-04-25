@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace CryptocurrencyMarketMonitoring.Model.Documents
 {
-    [CollectionName("chart_binance_{0}_{1}")]
+    [CollectionName("chart_binance_{0}/{1}_{2}")]
     [ConnectionName("NoSql")]
-    public class BinanceChartData
+    public class BinanceChartData : MongoDocumentBase
     {
         public DateTime OpenTime { get; set; }
         public decimal Open { get; set; }

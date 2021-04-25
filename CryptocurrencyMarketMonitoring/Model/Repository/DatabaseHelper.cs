@@ -25,9 +25,9 @@ namespace CryptocurrencyMarketMonitoring.Model.Repository
         /// <typeparam name="T">The type to get the collection of.</typeparam>
         /// <param name="connectionString">The connectionstring to use to get the collection from.</param>
         /// <returns>Returns a MongoCollection from the specified type and connectionstring.</returns>
-        internal static IMongoCollection<TDocument> GetCollectionFromConnectionString(string connectionString)
+        internal static IMongoCollection<TDocument> GetCollectionFromConnectionString(string connectionString, params string[] collectionNameParams)
         {
-            return GetCollectionFromConnectionString(connectionString, GetCollectionName()[0]);
+            return GetCollectionFromConnectionString(connectionString, GetCollectionName(collectionNameParams)[0]);
         }
 
         internal static IMongoCollection<TDocument> GetCollectionTempFromConnectionString(string connectionString)
@@ -88,11 +88,11 @@ namespace CryptocurrencyMarketMonitoring.Model.Repository
         /// </summary>
         /// <typeparam name="T">The type to determine the collection name for.</typeparam>
         /// <returns>Returns the collection name for T.</returns>
-        private static string[] GetCollectionName()
+        private static string[] GetCollectionName(params string[] collectionNameParams)
         {
             string[] collections = typeof(TDocument).GetTypeInfo().BaseType.Equals(typeof(object)) ?
                                       GetCollectionNameFromInterface() :
-                                      GetCollectionNameFromType();
+                                      GetCollectionNameFromType(collectionNameParams);
 
             return collections.Select(c => c?.ToLowerInvariant()).ToArray();
         }
@@ -116,7 +116,7 @@ namespace CryptocurrencyMarketMonitoring.Model.Repository
         /// </summary>
         /// <param name="entitytype">The type of the entity to get the collectionname from.</param>
         /// <returns>Returns the collectionname from the specified type.</returns>
-        private static string[] GetCollectionNameFromType()
+        private static string[] GetCollectionNameFromType(params string[] collectionNameParams)
         {
             Type entitytype = typeof(TDocument);
             string collectionName;
@@ -126,6 +126,9 @@ namespace CryptocurrencyMarketMonitoring.Model.Repository
             {
                 // It does! Return the value specified by the CollectionName attribute
                 collectionName = ((CollectionNameAttribute)att).Name;
+
+                if (collectionNameParams != null && collectionNameParams.Any())
+                    collectionName = string.Format(collectionName, collectionNameParams);
             }
             else
             {

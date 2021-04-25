@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Binance.Net.Interfaces;
 using CryptocurrencyMarketMonitoring.Abstractions.Units;
 using CryptocurrencyMarketMonitoring.Model.Documents;
 using CryptocurrencyMarketMonitoring.Model.Repository;
@@ -24,32 +25,30 @@ namespace CryptocurrencyMarketMonitoring.Model.Units
         }
 
 
-        public async Task<UserDto> GetAsync(Expression<Func<User, bool>> filter)
+        public async Task<IEnumerable<ChartDataDto>> GetAsync(Expression<Func<BinanceChartData, bool>> filter, int page, int pageSize, string currency, string vsCurrency, IntervalType intervalType)
         {
-            return await ExecuteCommandAsync<User, UserDto>(async locator =>
+            return await ExecuteCommandAsync<BinanceChartData, ChartDataDto>(async locator =>
             {
-                var user = await locator.FirstAsync(filter);
+                var binanceChartData = await locator.FindAsync(filter, (x => x.OpenTime), page, pageSize, true, currency, vsCurrency, intervalType.ToString());
+                var result = binanceChartData.Select(x => _mapper.Map<ChartDataDto>(x));
 
-                var userDto = _mapper.Map<UserDto>(user);
-
-                return userDto;
+                return result;
             });
         }
 
-        public async Task CreateManyAsync(UserDto userDto)
+        public async Task CreateManyAsync(IEnumerable<IBinanceKline> binanceKlines, string currency, string vsCurrency, IntervalType intervalType)
         {
-            if (userDto == null) return;
+            if (binanceKlines == null) return;
 
-            await ExecuteCommandAsync<User>(async locator =>
+            await ExecuteCommandAsync<BinanceChartData>(async locator =>
             {
-                var user = _mapper.Map<User>(userDto);
+                var convertedKlines = binanceKlines.Select(x => _mapper.Map<BinanceChartData>(x));
 
-                await locator.InsertAsync(user);
+                await locator.InsertAsync(convertedKlines, currency, vsCurrency, intervalType.ToString());
 
             });
         }
 
-     
         private ILogger<BinanceChartDataUnit> _logger;
         private IMapper _mapper;
     }

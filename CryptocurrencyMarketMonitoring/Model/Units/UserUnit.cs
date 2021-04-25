@@ -70,7 +70,7 @@ namespace CryptocurrencyMarketMonitoring.Model.Units
             {
                 var user = _mapper.Map<User>(userDto);
 
-                var u = GetUpdaterIdentityUserDto(locator, user);
+                var u = GetUpdater(locator, user);
 
                 if (await locator.UpdateAsync<User>(id, u))
                 {
@@ -79,14 +79,13 @@ namespace CryptocurrencyMarketMonitoring.Model.Units
 
        }
 
-        UpdateDefinition<User>[] GetUpdaterIdentityUserDto(IMongoRepositoryLocator locator, User user)
+        UpdateDefinition<User>[] GetUpdater(IMongoRepositoryLocator locator, User user)
         {
             UpdateDefinition<User>[] updates = null;
 
             var updater = locator.GetUpdater<User>();
             updates = new UpdateDefinition<User>[]
                 {
-                    updater.Set(a => a.Username, user.Username),
                     updater.Set(a => a.PasswordHash, user.PasswordHash),
                     updater.Set(a => a.FirstName, user.FirstName),
                     updater.Set(a => a.LastName, user.LastName),

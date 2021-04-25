@@ -1,5 +1,7 @@
 ﻿using Autofac;
 using AutoMapper;
+using Binance.Net.Interfaces;
+using CoinGecko.Entities.Response.Coins;
 using CryptocurrencyMarketMonitoring.Abstractions.Units;
 using CryptocurrencyMarketMonitoring.Model.Documents;
 using CryptocurrencyMarketMonitoring.Model.Repository;
@@ -18,7 +20,9 @@ namespace CryptocurrencyMarketMonitoring.Model
         protected override void Load(ContainerBuilder builder)
         {
             builder.RegisterType<UserUnit>().As<IUserUnit<User>>().InstancePerLifetimeScope();
-            
+            builder.RegisterType<BinanceChartDataUnit>().As<IBinanceChartDataUnit<BinanceChartData>>().InstancePerLifetimeScope();
+            builder.RegisterType<BinanceLastDownloadedPairUnit>().As<IBinanceLastDownloadedPairUnit<BinanceLastDownloadedPair>>().InstancePerLifetimeScope();
+
             builder.RegisterType<MongoRepositoryLocator>().As<IMongoRepositoryLocator>();
 
 
@@ -26,6 +30,15 @@ namespace CryptocurrencyMarketMonitoring.Model
             {
                 cfg.CreateMap<User, UserDto>();
                 cfg.CreateMap<UserDto, User>();
+                cfg.CreateMap<IBinanceKline, BinanceChartData>();
+                cfg.CreateMap<BinanceChartData, ChartDataDto>()
+                    .ForMember(dest => dest.Date, opt => opt.MapFrom(src => src.OpenTime))
+                    .ForMember(dest => dest.Volume, opt => opt.MapFrom(src => src.BaseVolume));
+                cfg.CreateMap<CoinMarkets, OverviewDto>()
+                    .ForMember(dest => dest.Symbol, opt => opt.MapFrom(src => src.Symbol.ToUpperInvariant()))
+                    .ForMember(dest => dest.PriceChangePercentage24HInCurrency, opt => opt.MapFrom(src => src.PriceChangePercentage24HInCurrency / 100))
+                    .ForMember(dest => dest.PriceChangePercentage7DInCurrency, opt => opt.MapFrom(src => src.PriceChangePercentage7DInCurrency / 100));
+
             })).AsSelf().SingleInstance();
 
 

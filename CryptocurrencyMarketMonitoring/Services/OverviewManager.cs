@@ -17,6 +17,8 @@ using System.Threading;
 using Force.DeepCloner;
 using KellermanSoftware.CompareNetObjects;
 using Microsoft.Extensions.Hosting;
+using AutoMapper;
+using CoinGecko.Entities.Response.Coins;
 
 namespace CryptocurrencyMarketMonitoring.Services
 {
@@ -24,22 +26,28 @@ namespace CryptocurrencyMarketMonitoring.Services
     public class OverviewManager : BackgroundService, IOverviewManager
     {
 
-        public OverviewManager(IHubContext<OverviewUpdateHub, IOverviewUpdateClient> updateHub, ICoinGeckoClient coinGeckoClient, IBinanceClient binanceClient, IOverviewSubscriptionManager subscriptionManager)
+        public OverviewManager(IHubContext<OverviewUpdateHub, IOverviewUpdateClient> updateHub, ICoinGeckoClient coinGeckoClient, IBinanceClient binanceClient, IOverviewSubscriptionManager subscriptionManager, IMapper mapper)
         {
             _updateHub = updateHub;
             _binanceClient = binanceClient;
             _coinGeckoClient = coinGeckoClient;
             _subscriptionManager = subscriptionManager;
+            _mapper = mapper;
         }
 
         public override async Task StartAsync(CancellationToken cancellationToken)
         {
             var supportedCurrencies = await _coinGeckoClient.SimpleClient.GetSupportedVsCurrencies();
 
+
+            //Temporary currency limit in place for testing purposes
             _supportedCurrencies = supportedCurrencies.Select(x => x.ToUpperInvariant()).Take(5).ToList();
 
             if (!_supportedCurrencies.Contains("USD"))
                 _supportedCurrencies.Add("USD");
+
+            if (!_supportedCurrencies.Contains("EUR"))
+                _supportedCurrencies.Add("EUR");
 
             await UpdateDataAsync(sendUpdate: false);
             _waitHandle.Set();
@@ -77,7 +85,7 @@ namespace CryptocurrencyMarketMonitoring.Services
 
             if (_overviewData.TryGetValue(currency, out var currencyData))
             {
-                var retval = currencyData.Values.OrderBy(x => x.Ranking).ToList();
+                var retval = currencyData.Values.OrderBy(x => x.MarketCapRank).ToList();
 
                 return retval;
             }
@@ -111,18 +119,7 @@ namespace CryptocurrencyMarketMonitoring.Services
                 var newValues = new List<OverviewDto>();
                 foreach (var coinMarket in coinMarkets)
                 {
-                    var cryptocurrency = new OverviewDto()
-                    {
-                        Ranking = coinMarket.MarketCapRank ?? 0,
-                        Name = coinMarket.Name,
-                        Ticker = coinMarket.Symbol.ToUpper(),
-                        LastDayPercentageMovement = coinMarket.PriceChangePercentage24HInCurrency / 100 ?? 0,
-                        LastWeekPercentageMovement = coinMarket.PriceChangePercentage7DInCurrency / 100 ?? 0,
-                        Price = coinMarket.CurrentPrice ?? 0,
-                        Volume = coinMarket.TotalVolume ?? 0,
-                        MarketCap = coinMarket.MarketCap ?? 0,
-                        IconSrc = coinMarket.Image
-                    };
+                    var cryptocurrency = _mapper.Map<CoinMarkets, OverviewDto>(coinMarket);
 
                     supportedCurrencyData.AddOrUpdate(cryptocurrency.Name, cryptocurrency, (key, value) => cryptocurrency);
                     newValues.Add(cryptocurrency);
@@ -217,5 +214,6 @@ namespace CryptocurrencyMarketMonitoring.Services
         private readonly CancellationTokenSource _stoppingCts = new();
         private List<string> _supportedCurrencies;
         IOverviewSubscriptionManager _subscriptionManager;
+        IMapper _mapper;
     }
 }

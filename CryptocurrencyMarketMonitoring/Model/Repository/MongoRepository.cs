@@ -30,9 +30,9 @@ namespace CryptocurrencyMarketMonitoring.Model.Repository
         /// constructor
         /// </summary>
         /// <param name="connectionString">connection string</param>
-        public MongoRepository(string connectionString)
+        public MongoRepository(string connectionString, params string[] collectionNameParams)
         {
-            Collection = DatabaseHelper<TDocument>.GetCollectionFromConnectionString(connectionString);
+            Collection = DatabaseHelper<TDocument>.GetCollectionFromConnectionString(connectionString, collectionNameParams);
         }
 
         /// <summary>
@@ -675,16 +675,16 @@ namespace CryptocurrencyMarketMonitoring.Model.Repository
         {
             return Retry(() =>
             {
-                var update = Updater.Combine(updates).Set("_m", DateTime.UtcNow);
-                return Collection.UpdateMany(filter, update.Set("_m", DateTime.UtcNow)).IsAcknowledged;
+                var update = Updater.Combine(updates);
+                return Collection.UpdateMany(filter, update).IsAcknowledged;
             });
         }
         public async Task<bool> UpdateAsync(FilterDefinition<TDocument> filter, params UpdateDefinition<TDocument>[] updates)
         {
             return await RetryAsync(async () =>
             {
-                var update = Updater.Combine(updates).Set("_m", DateTime.UtcNow - DateTime.UnixEpoch);
-                var result = await Collection.UpdateManyAsync(filter, update.Set("_m", DateTime.UtcNow));
+                var update = Updater.Combine(updates);
+                var result = await Collection.UpdateManyAsync(filter, update);
                 return result.IsAcknowledged;
             });
         }

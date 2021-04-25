@@ -22,6 +22,7 @@ namespace CryptocurrencyMarketMonitoring.Services
         {
             builder.RegisterType<OverviewService>().As<IOverviewService>();
             builder.RegisterType<OverviewManager>().As<IOverviewManager>().As<IHostedService>().SingleInstance();
+            builder.RegisterType<BinanceChartDownloadManager>().As<IBinanceChartDownloadManager>().As<IHostedService>().SingleInstance();
             builder.RegisterType<CoinGeckoClient>().As<ICoinGeckoClient>();
             builder.RegisterType<ChartDataService>().As<IChartDataService>();
             builder.RegisterType<UserService>().As<IUserService>();

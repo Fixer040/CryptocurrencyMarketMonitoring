@@ -19,10 +19,10 @@ namespace CryptocurrencyMarketMonitoring.Server.Controllers
             _chartDataService = chartDataService;
         }
 
-        [HttpGet("{ticker}")]
-        public async Task<IActionResult> GetCryptocurrencyList(string ticker, [FromQuery]int intervalType)
+        [HttpGet("{currency}/{vsCurrency}/{intervalType}")]
+        public async Task<IActionResult> GetCryptocurrencyList(string currency, string vsCurrency, IntervalType intervalType)
         {
-            var data = await _chartDataService.GetChartDataAsync(ticker, intervalType);
+            var data = await _chartDataService.GetChartDataAsync(currency, vsCurrency, intervalType);
             return Ok(data);
         }
 

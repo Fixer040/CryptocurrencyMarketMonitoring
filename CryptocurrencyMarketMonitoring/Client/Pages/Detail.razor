@@ -1,80 +1,72 @@
-﻿@page "/detail/{Ticker}"
+﻿@page "/detail/{Currency}"
 
 @using Syncfusion.Blazor.Charts;
 @using CryptocurrencyMarketMonitoring.Shared
 @using System.Linq;
 @using System.Collections.Generic;
 @using Syncfusion.Blazor.Data
+@using Syncfusion.Blazor.Layouts
+
 
 
 @inject HttpClient Http
 
 
+<div class="px-4 text-center justify-content-center w-75 m-auto">
+    <SfDashboardLayout Columns="6" CellSpacing="@(new double[]{10 ,10 })">
+        <DashboardLayoutPanels>
+            <DashboardLayoutPanel Id="Panel1" SizeX=6 SizeY=2 Column=1 Row=1>
+                <HeaderTemplate><div class='header'> Trading view data by Binance</div></HeaderTemplate>
+                <ContentTemplate>
+                    <div class="w-100">
+                        <SfStockChart>
+                            <StockChartTooltipSettings Enable="true"></StockChartTooltipSettings>
+                            <StockChartCrosshairSettings Enable="true"></StockChartCrosshairSettings>
+                            <StockChartSeriesCollection>
+                                <StockChartSeries DataSource="@ChartData" Type="ChartSeriesType.Candle"
+                                                  XName="@nameof(ChartDataDto.Date)"
+                                                  YName="@nameof(ChartDataDto.Close)"
+                                                  High="@nameof(ChartDataDto.High)"
+                                                  Low="@nameof(ChartDataDto.Low)"
+                                                  Open="@nameof(ChartDataDto.Open)"
+                                                  Close="@nameof(ChartDataDto.Close)"
+                                                  Volume="@nameof(ChartDataDto.Volume)">
+                                </StockChartSeries>
+                            </StockChartSeriesCollection>
+                        </SfStockChart>
+                    </div>
+                </ContentTemplate>
+            </DashboardLayoutPanel>
+        </DashboardLayoutPanels>
+    </SfDashboardLayout>
+</div>
 
-
-<SfStockChart EnablePeriodSelector="true" @ref="StockChart">
-    <StockChartTooltipSettings Enable="true"></StockChartTooltipSettings>
-    <StockChartCrosshairSettings Enable="true"></StockChartCrosshairSettings>
-    <StockChartPeriods>
-        <StockChartPeriod IntervalType=RangeIntervalType.Days Interval="1" Text="1m" ></StockChartPeriod>
-        <StockChartPeriod IntervalType=RangeIntervalType.Days Interval="2" Text='3m'></StockChartPeriod>
-        <StockChartPeriod IntervalType=RangeIntervalType.Days Interval="3" Text='5m'></StockChartPeriod>
-        <StockChartPeriod IntervalType=RangeIntervalType.Days Interval="4" Text='15m'></StockChartPeriod>
-        <StockChartPeriod IntervalType=RangeIntervalType.Days Interval="5" Text="30m" ></StockChartPeriod>
-        <StockChartPeriod IntervalType=RangeIntervalType.Days Interval="10" Text='1h' ></StockChartPeriod>
-        <StockChartPeriod IntervalType=RangeIntervalType.Days Interval="20" Text='2h'></StockChartPeriod>
-        <StockChartPeriod IntervalType=RangeIntervalType.Days Interval="40" Text='4h'></StockChartPeriod>
-        <StockChartPeriod IntervalType=RangeIntervalType.Days Interval="60" Text="6h" ></StockChartPeriod>
-        <StockChartPeriod IntervalType=RangeIntervalType.Days Interval="80" Text='8h'></StockChartPeriod>
-        <StockChartPeriod IntervalType=RangeIntervalType.Days Interval="120" Text='12h'></StockChartPeriod>
-        <StockChartPeriod IntervalType=RangeIntervalType.Months Interval="10" Text='1D' Selected="true"></StockChartPeriod>
-        <StockChartPeriod IntervalType=RangeIntervalType.Months Interval="30" Text='3D'></StockChartPeriod>
-        <StockChartPeriod IntervalType=RangeIntervalType.Years Interval="1" Text='1W'></StockChartPeriod>
-        <StockChartPeriod IntervalType=RangeIntervalType.Years Interval="5" Text='1M'></StockChartPeriod>
-
-    </StockChartPeriods>
-    <StockChartSeriesCollection>
-        <StockChartSeries DataSource="@ChartData" Type="ChartSeriesType.Candle"
-                          XName="@nameof(ChartDataDto.Date)"
-                          YName="@nameof(ChartDataDto.Close)"
-                          High="@nameof(ChartDataDto.High)"
-                          Low="@nameof(ChartDataDto.Low)"
-                          Open="@nameof(ChartDataDto.Open)"
-                          Close="@nameof(ChartDataDto.Close)"
-                          Volume="@nameof(ChartDataDto.Volume)">
-        </StockChartSeries>
-    </StockChartSeriesCollection>
-</SfStockChart>
 
 @code {
     [Parameter]
-    public string Ticker { get; set; }
-
+    public string Currency { get; set; }
+    public string VsCurrency { get; set; } = "USD";
+    public CryptocurrencyMarketMonitoring.Shared.IntervalType IntervalType { get; set; } = CryptocurrencyMarketMonitoring.Shared.IntervalType.one_hour;
 
     public List<ChartDataDto> ChartData { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
-        _activeIntervalType = 11;
-        var cryptocurrencyList = await Http.GetFromJsonAsync<ChartDataDto[]>($"ChartData/{Ticker}?intervalType={_activeIntervalType}");
+        var cryptocurrencyList = await Http.GetFromJsonAsync<ChartDataDto[]>($"ChartData/{Currency}/{VsCurrency}/{IntervalType}");
 
         ChartData = cryptocurrencyList.ToList();
 
-        //StockChart.Refresh();
-
+        StateHasChanged();
         base.OnInitialized();
     }
 
 
     public async Task UpdateGrid(int intervalType)
     {
-        var cryptocurrencyList = await Http.GetFromJsonAsync<ChartDataDto[]>($"ChartData/{Ticker}?intervalType={intervalType}");
+        var cryptocurrencyList = await Http.GetFromJsonAsync<ChartDataDto[]>($"ChartData/{Currency}/{VsCurrency}/{IntervalType}");
 
         ChartData = cryptocurrencyList.ToList();        // Here you can customize your code
-        StockChart.Refresh();
-
+        StateHasChanged();
     }
 
-    public SfStockChart StockChart;
-    private int _activeIntervalType = 11;
 }

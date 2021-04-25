@@ -31,7 +31,7 @@ namespace CryptocurrencyMarketMonitoring.Services
         {
             using (var unit = DIContainer.BeginScopeService<IUserUnit<User>>())
             {
-                var user = await unit.GetAsync(x => x.Username == login.Username);
+                var user = await unit.GetAsync(x => x.Email == login.Username);
 
                 if (user == null)
                     throw new Exception("User not found.");
@@ -53,10 +53,10 @@ namespace CryptocurrencyMarketMonitoring.Services
         {
             using (var unit = DIContainer.BeginScopeService<IUserUnit<User>>())
             {
-                var user = await unit.GetAsync(x => x.Username == userDto.Username || x.Email == userDto.Email);
+                var user = await unit.GetAsync(x => x.Email == userDto.Email);
 
                 if (user != null)
-                    throw new Exception("User with this user name or email already exists!");
+                    throw new Exception("User with this email already exists!");
 
                 userDto.PasswordHash = _passwordHasherService.Hash(userDto.Password);
 

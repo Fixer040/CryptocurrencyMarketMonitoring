@@ -11,7 +11,7 @@ namespace CryptocurrencyMarketMonitoring.Abstractions.Units
 {
     public interface IBinanceChartDataUnit<TDocument> : IDisposable
     {
-        Task<ChartDataDto> GetAsync(Expression<Func<TDocument, bool>> filter, int page, int pageCount);
-        Task CreateManyAsync(IEnumerable<IBinanceKline> binanceKlines);
+        Task<IEnumerable<ChartDataDto>> GetAsync(Expression<Func<TDocument, bool>> filter, int page, int pageSize, string currency, string vsCurrency, IntervalType intervalType);
+        Task CreateManyAsync(IEnumerable<IBinanceKline> binanceKlines, string currency, string vsCurrency, IntervalType intervalType);
     }
 }

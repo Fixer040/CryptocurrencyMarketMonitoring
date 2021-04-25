@@ -225,11 +225,11 @@ namespace CryptocurrencyMarketMonitoring.Model.Repository
         }
         protected Dictionary<Type, object> RepositoryMap = new Dictionary<Type, object>();
 
-        public IMongoRepository<TEntity> GetRepository<TEntity>() where TEntity : IMongoDocumentBase
+        public IMongoRepository<TEntity> GetRepository<TEntity>(params string[] collectionNameParams) where TEntity : IMongoDocumentBase
         {
             var type = typeof(TEntity);
             if (RepositoryMap.Keys.Contains(type)) return RepositoryMap[type] as IMongoRepository<TEntity>;
-            var repository = CreateRepository<TEntity>();
+            var repository = CreateRepository<TEntity>(collectionNameParams);
             RepositoryMap.Add(type, repository);
             return repository;
         }
@@ -309,9 +309,9 @@ namespace CryptocurrencyMarketMonitoring.Model.Repository
             return await GetRepository<TEntity>().FindAsync(filter, order, pageIndex, size);
         }
 
-        public async Task<IEnumerable<TEntity>> FindAsync<TEntity>(Expression<Func<TEntity, bool>> filter, Expression<Func<TEntity, object>> order, int? pageIndex, int? size, bool isDescending) where TEntity : IMongoDocumentBase
+        public async Task<IEnumerable<TEntity>> FindAsync<TEntity>(Expression<Func<TEntity, bool>> filter, Expression<Func<TEntity, object>> order, int? pageIndex, int? size, bool isDescending, params string[] collectionNameParams) where TEntity : IMongoDocumentBase
         {
-            return await GetRepository<TEntity>().FindAsync(filter, order, pageIndex, size, isDescending);
+            return await GetRepository<TEntity>(collectionNameParams).FindAsync(filter, order, pageIndex, size, isDescending);
         }
 
         public async Task<IEnumerable<TEntity>> FindAsync<TEntity>(Expression<Func<TEntity, bool>> filter, Expression<Func<TEntity, object>> order, int? pageIndex, int? size, bool isDescending, Expression<Func<TEntity, TEntity>> projection) where TEntity : IMongoDocumentBase
@@ -319,9 +319,9 @@ namespace CryptocurrencyMarketMonitoring.Model.Repository
             return await GetRepository<TEntity>().FindAsync(filter, order, pageIndex, size, isDescending, projection);
         }
 
-        public async Task<IEnumerable<TEntity>> FindAsync<TEntity>(Expression<Func<TEntity, bool>> filter, int? pageIndex, int? size) where TEntity : IMongoDocumentBase
+        public async Task<IEnumerable<TEntity>> FindAsync<TEntity>(Expression<Func<TEntity, bool>> filter, int? pageIndex, int? size, params string[] collectionNameParams) where TEntity : IMongoDocumentBase
         {
-            return await GetRepository<TEntity>().FindAsync(filter, pageIndex, size);
+            return await GetRepository<TEntity>(collectionNameParams).FindAsync(filter, pageIndex, size);
         }
 
         public async Task<TEntity> FirstAsync<TEntity>() where TEntity : IMongoDocumentBase
@@ -359,9 +359,9 @@ namespace CryptocurrencyMarketMonitoring.Model.Repository
             return await GetRepository<TEntity>().GetAsync(id, projection);
         }
 
-        public async Task InsertAsync<TEntity>(IEnumerable<TEntity> entities) where TEntity : IMongoDocumentBase
+        public async Task InsertAsync<TEntity>(IEnumerable<TEntity> entities, params string[] collectionNameParams) where TEntity : IMongoDocumentBase
         {
-            await GetRepository<TEntity>().InsertAsync(entities);
+            await GetRepository<TEntity>(collectionNameParams).InsertAsync(entities);
         }
 
         public async Task InsertAsync<TEntity>(TEntity entity) where TEntity : IMongoDocumentBase
@@ -450,10 +450,10 @@ namespace CryptocurrencyMarketMonitoring.Model.Repository
             return await GetRepository<TEntity>().GetCountAsync(filter);
         }
 
-        private IMongoRepository<TEntity> CreateRepository<TEntity>() where TEntity : IMongoDocumentBase
+        private IMongoRepository<TEntity> CreateRepository<TEntity>(params string[] collectionNameParams) where TEntity : IMongoDocumentBase
         {
             string connectionString = DatabaseHelper<TEntity>.GetDefaultConnectionString();
-            return new MongoRepository<TEntity>(connectionString);
+            return new MongoRepository<TEntity>(connectionString, collectionNameParams);
 
         }
     }

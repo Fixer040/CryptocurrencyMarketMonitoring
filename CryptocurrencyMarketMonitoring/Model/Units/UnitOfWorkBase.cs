@@ -180,7 +180,7 @@ namespace CryptocurrencyMarketMonitoring.Model.Units
             }
         }
 
-        protected async Task<IEnumerable<TEntity>> ExecuteCommandAsync<TEntity>(Func<IMongoRepositoryLocator, Task<IEnumerable<TEntity>>> command) where TEntity : class, IMongoDocumentBase
+        protected async Task<IEnumerable<TResult>> ExecuteCommandAsync<TEntity, TResult>(Func<IMongoRepositoryLocator, Task<IEnumerable<TResult>>> command) where TEntity : class, IMongoDocumentBase
         {
             try
             {

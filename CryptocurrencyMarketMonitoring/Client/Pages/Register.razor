@@ -21,37 +21,37 @@
                 <EditForm Model="@_user" OnValidSubmit="HandleValidSubmit">
                     <DataAnnotationsValidator />
                     <div class="form-group d-flex justify-content-center">
-                        <label class="w-50">
+                        <label class="w-75">
                             First name
                             <InputText @bind-Value="_user.FirstName" class="form-control" />
                             <ValidationMessage For="@(() => _user.FirstName)" />
                         </label>
                     </div>
                     <div class="form-group d-flex justify-content-center">
-                        <label class="w-50">
+                        <label class="w-75">
                             Last name
                             <InputText @bind-Value="_user.LastName" class="form-control" />
                             <ValidationMessage For="@(() => _user.LastName)" />
                         </label>
                     </div>
                     <div class="form-group d-flex justify-content-center">
-                        <label class="w-50">
+                        <label class="w-75">
                             E-mail
                             <InputText @bind-Value="_user.Email" class="form-control" />
                             <ValidationMessage For="@(() => _user.Email)" />
                         </label>
                     </div>
                     <div class="form-group d-flex justify-content-center">
-                        <label class="w-50">
-                            Username
-                            <InputText @bind-Value="_user.Username" class="form-control" />
-                            <ValidationMessage For="@(() => _user.Username)" />
+                        <label class="w-75">
+                            Password
+                            <InputText @bind-Value="_user.Password" type="password" class="form-control" />
+                            <ValidationMessage For="@(() => _user.Password)" />
                         </label>
                     </div>
                     <div class="form-group d-flex justify-content-center">
-                        <label class="w-50">
-                            Password
-                            <InputText @bind-Value="_user.Password" type="password" class="form-control" />
+                        <label class="w-75">
+                            Re-type your password
+                            <InputText @bind-Value="_passwordValidation" type="password" class="form-control" />
                             <ValidationMessage For="@(() => _user.Password)" />
                         </label>
                     </div>
@@ -94,6 +94,10 @@
         _error = null;
         try
         {
+
+            if (_user.Password != _passwordValidation)
+                throw new Exception("Passwords do not match!");
+
             await HttpService.Post("User/register", _user);
 
             _success = true;
@@ -111,6 +115,7 @@
     }
 
     private UserDto _user = new UserDto();
+    private string _passwordValidation;
     private bool _loading;
     private string _error;
     private bool _success;

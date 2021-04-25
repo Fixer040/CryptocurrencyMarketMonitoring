@@ -9,6 +9,6 @@ namespace CryptocurrencyMarketMonitoring.Abstractions.Services
 {
     public interface IChartDataService
     {
-        Task<IEnumerable<ChartDataDto>> GetChartDataAsync(string ticker, int intervalType);
+        Task<IEnumerable<ChartDataDto>> GetChartDataAsync(string currency, string vsCurrency, IntervalType intervalType);
     }
 }

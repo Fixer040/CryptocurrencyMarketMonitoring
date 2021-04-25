@@ -17,7 +17,7 @@
 @inject IHttpService HttpService
 
 
-<div class=" px-4 text-center justify-content-center w-75 m-auto">
+<div class="px-4 text-center justify-content-center w-75 m-auto">
     <h1>Cryptocurrency Prices by Market Cap</h1>
 
     <div class="d-flex justify-content-start">
@@ -27,26 +27,26 @@
         <GridPageSettings PageSize="100"></GridPageSettings>
         <GridSortSettings>
             <GridSortColumns>
-                <GridSortColumn Field="@nameof(OverviewDto.Ranking)" Direction="SortDirection.Ascending"></GridSortColumn>
+                <GridSortColumn Field="@nameof(OverviewDto.MarketCapRank)" Direction="SortDirection.Ascending"></GridSortColumn>
             </GridSortColumns>
         </GridSortSettings>
         <GridColumns>
-            <GridColumn Field="@nameof(OverviewDto.Ranking)" HeaderText="Ranking" TextAlign="TextAlign.Center" />
+            <GridColumn Field="@nameof(OverviewDto.MarketCapRank)" HeaderText="Ranking" TextAlign="TextAlign.Center" />
             <GridColumn HeaderText="" TextAlign="TextAlign.Center" Width="45" AllowSorting="false">
                 <Template>
                     @{
                         var employee = (context as OverviewDto);
                         <div class="image">
-                            <img width="30" height="30" src="@employee.IconSrc" />
+                            <img width="30" height="30" src="@employee.Image" />
                         </div>
                     }
                 </Template>
             </GridColumn>
             <GridColumn Field="@nameof(OverviewDto.Name)" HeaderText="Name" TextAlign="TextAlign.Center" />
-            <GridColumn Field="@nameof(OverviewDto.Ticker)" HeaderText="Symbol" TextAlign="TextAlign.Center">
+            <GridColumn Field="@nameof(OverviewDto.Symbol)" HeaderText="Symbol" TextAlign="TextAlign.Center">
                 <Template>
                     @{
-                        var ticker = ((OverviewDto)context).Ticker;
+                        var ticker = ((OverviewDto)context).Symbol;
                         var link = $"/detail/{ticker}";
                         <div>
                             <NavLink href="@link">@ticker</NavLink>
@@ -54,39 +54,39 @@
                     }
                 </Template>
             </GridColumn>
-            <GridColumn Field="@nameof(OverviewDto.Price)" HeaderText="Price" TextAlign="TextAlign.Center">
+            <GridColumn Field="@nameof(OverviewDto.CurrentPrice)" HeaderText="Price" TextAlign="TextAlign.Center">
                 <Template>
                     @{
                         var dto = (OverviewDto)context;
-                        var priceString = dto.Price < 1 ? dto.Price.ToString($"{ActiveCurrency} ###,###,##0.0000000000") : dto.Price.ToString($"{ActiveCurrency} ###,###,##0.00");
+                        var priceString = dto.CurrentPrice < 1 ? dto.CurrentPrice.ToString($"{ActiveCurrency} ###,###,##0.0000000000") : dto.CurrentPrice.ToString($"{ActiveCurrency} ###,###,##0.00");
 
                         <div>@priceString</div>
                     }
                 </Template>
             </GridColumn>
-            <GridColumn Field="@nameof(OverviewDto.LastDayPercentageMovement)" HeaderText="24h" TextAlign="TextAlign.Center">
+            <GridColumn Field="@nameof(OverviewDto.PriceChangePercentage24HInCurrency)" HeaderText="24h" TextAlign="TextAlign.Center">
                 <Template>
                     @{
-                        <div class="@(((OverviewDto)context).LastDayPercentageMovement < 0 ? "text-danger" : "text-success")">
-                            @(((OverviewDto)context).LastDayPercentageMovement.ToString("0.00%"))
+                        <div class="@(((OverviewDto)context).PriceChangePercentage24HInCurrency < 0 ? "text-danger" : "text-success")">
+                            @(((OverviewDto)context).PriceChangePercentage24HInCurrency.ToString("0.00%"))
                         </div>
                     }
                 </Template>
             </GridColumn>
-            <GridColumn Field="@nameof(OverviewDto.LastWeekPercentageMovement)" HeaderText="7d" TextAlign="TextAlign.Center">
+            <GridColumn Field="@nameof(OverviewDto.PriceChangePercentage7DInCurrency)" HeaderText="7d" TextAlign="TextAlign.Center">
                 <Template>
                     @{
-                        <div class="@(((OverviewDto)context).LastWeekPercentageMovement < 0 ? "text-danger" : "text-success")">
-                            @(((OverviewDto)context).LastWeekPercentageMovement.ToString("0.00%"))
+                        <div class="@(((OverviewDto)context).PriceChangePercentage7DInCurrency < 0 ? "text-danger" : "text-success")">
+                            @(((OverviewDto)context).PriceChangePercentage7DInCurrency.ToString("0.00%"))
                         </div>
                     }
                 </Template>
             </GridColumn>
-            <GridColumn Field="@nameof(OverviewDto.Volume)" HeaderText="Volume" TextAlign="TextAlign.Center">
+            <GridColumn Field="@nameof(OverviewDto.TotalVolume)" HeaderText="Volume" TextAlign="TextAlign.Center">
                 <Template>
                     @{
                         var dto = (OverviewDto)context;
-                        <div>@dto.Volume.ToString($"{ActiveCurrency} ###,###,###,###,###,###")</div>
+                        <div>@dto.TotalVolume.ToString($"{ActiveCurrency} ###,###,###,###,###,###")</div>
                     }
                 </Template>
             </GridColumn>
@@ -174,23 +174,23 @@
 
     private void UpdateCryptocurrencyOverviewData(OverviewDto overview, OverviewUpdateDto update)
     {
-        if (overview.Ranking != update.Data.Ranking)
-            overview.Ranking = update.Data.Ranking;
+        if (overview.MarketCapRank != update.Data.MarketCapRank)
+            overview.MarketCapRank = update.Data.MarketCapRank;
 
-        if (overview.LastDayPercentageMovement != update.Data.LastDayPercentageMovement)
-            overview.LastDayPercentageMovement = update.Data.LastDayPercentageMovement;
+        if (overview.PriceChangePercentage24HInCurrency != update.Data.PriceChangePercentage24HInCurrency)
+            overview.PriceChangePercentage24HInCurrency = update.Data.PriceChangePercentage24HInCurrency;
 
-        if (overview.LastWeekPercentageMovement != update.Data.LastWeekPercentageMovement)
-            overview.LastWeekPercentageMovement = update.Data.LastWeekPercentageMovement;
+        if (overview.PriceChangePercentage7DInCurrency != update.Data.PriceChangePercentage7DInCurrency)
+            overview.PriceChangePercentage7DInCurrency = update.Data.PriceChangePercentage7DInCurrency;
 
         if (overview.MarketCap != update.Data.MarketCap)
             overview.MarketCap = update.Data.MarketCap;
 
-        if (overview.Price != update.Data.Price)
-            overview.Price = update.Data.Price;
+        if (overview.CurrentPrice != update.Data.CurrentPrice)
+            overview.CurrentPrice = update.Data.CurrentPrice;
 
-        if (overview.Volume != update.Data.Volume)
-            overview.Volume = update.Data.Volume;
+        if (overview.TotalVolume != update.Data.TotalVolume)
+            overview.TotalVolume = update.Data.TotalVolume;
     }
 
     private async Task ReloadGridCurrencyAsync(string newCurrency)
