@@ -26,10 +26,9 @@ namespace CryptocurrencyMarketMonitoring.Services
     public class OverviewManager : BackgroundService, IOverviewManager
     {
 
-        public OverviewManager(IHubContext<OverviewUpdateHub, IOverviewUpdateClient> updateHub, ICoinGeckoClient coinGeckoClient, IBinanceClient binanceClient, IOverviewSubscriptionManager subscriptionManager, IMapper mapper)
+        public OverviewManager(IHubContext<OverviewUpdateHub, IOverviewUpdateClient> updateHub, ICoinGeckoClient coinGeckoClient, IOverviewSubscriptionManager subscriptionManager, IMapper mapper)
         {
             _updateHub = updateHub;
-            _binanceClient = binanceClient;
             _coinGeckoClient = coinGeckoClient;
             _subscriptionManager = subscriptionManager;
             _mapper = mapper;
@@ -79,7 +78,7 @@ namespace CryptocurrencyMarketMonitoring.Services
             return _supportedCurrencies;
         }
 
-        public IEnumerable<OverviewDto> GetOverview(string currency)
+        public IEnumerable<OverviewDto> GetOverviewAll(string currency)
         {
             _waitHandle.WaitOne();
 
@@ -88,6 +87,19 @@ namespace CryptocurrencyMarketMonitoring.Services
                 var retval = currencyData.Values.OrderBy(x => x.MarketCapRank).ToList();
 
                 return retval;
+            }
+
+            return null;
+        }
+
+        public OverviewDto GetOverview(string currency, string vsCurrency)
+        {
+            _waitHandle.WaitOne();
+
+            if (_overviewData.TryGetValue(vsCurrency, out var vsCurrencyData))
+            {
+                if (vsCurrencyData.TryGetValue(currency, out var overview))
+                    return overview;
             }
 
             return null;
@@ -114,12 +126,32 @@ namespace CryptocurrencyMarketMonitoring.Services
                 }
 
                 var coinMarkets = await _coinGeckoClient.CoinsClient.GetCoinMarkets(supportedCurrency, Array.Empty<string>(), "market_cap_desc", 250, 1, true, "7d,24h", null);
+                await Task.Delay(500);
 
                 var oldValues = supportedCurrencyData.Values.Select(x => x.DeepClone()).ToList();
                 var newValues = new List<OverviewDto>();
                 foreach (var coinMarket in coinMarkets)
                 {
                     var cryptocurrency = _mapper.Map<CoinMarkets, OverviewDto>(coinMarket);
+
+                    cryptocurrency.Sparkline = new SparklineDto();
+
+                    var sparklineValues = new List<SparklineValueDto>();
+
+                    for (int i = 0; i < coinMarket.SparklineIn7D.Price.Length; i++)
+                    {
+
+                        var sparklinevalue = new SparklineValueDto()
+                        {
+                            Id = i,
+                            Value = coinMarket.SparklineIn7D.Price[i]
+                        };
+
+                        sparklineValues.Add(sparklinevalue);
+                    }
+
+                    cryptocurrency.Sparkline.SparklineValues = sparklineValues;
+
 
                     supportedCurrencyData.AddOrUpdate(cryptocurrency.Name, cryptocurrency, (key, value) => cryptocurrency);
                     newValues.Add(cryptocurrency);
@@ -205,7 +237,6 @@ namespace CryptocurrencyMarketMonitoring.Services
 
 
         private ConcurrentDictionary<string, ConcurrentDictionary<string, OverviewDto>> _overviewData = new();
-        private readonly IBinanceClient _binanceClient;
         private readonly ICoinGeckoClient _coinGeckoClient;
         private int _updateCyclePeriod = 60000;
         private readonly IHubContext<OverviewUpdateHub, IOverviewUpdateClient> _updateHub;
@@ -213,7 +244,7 @@ namespace CryptocurrencyMarketMonitoring.Services
         private Task _executingTask;
         private readonly CancellationTokenSource _stoppingCts = new();
         private List<string> _supportedCurrencies;
-        IOverviewSubscriptionManager _subscriptionManager;
-        IMapper _mapper;
+        private IOverviewSubscriptionManager _subscriptionManager;
+        private IMapper _mapper;
     }
 }

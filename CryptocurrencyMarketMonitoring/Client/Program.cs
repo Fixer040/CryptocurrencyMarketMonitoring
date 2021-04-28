@@ -26,7 +26,7 @@ namespace CryptocurrencyMarketMonitoring.Client
 		
             builder.RootComponents.Add<App>("#app");
 
-            Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("NDI2MDAyQDMxMzgyZTM0MmUzMGRVdUIyTVhyNm9wbUVPRmtDMGsvL3hsTm9KNXdkVDJYMVROTmwzTy9LVlU9");
+            Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("NDM3NTY3QDMxMzgyZTM0MmUzME1uaEZRTWRadEFVR0VEV0R6Z0RSVkpXcW0xc3ltS0U4Z1FzVmxaRU5tT1U9");
 
             builder.Services
                 .AddScoped<IAuthenticationService, AuthenticationService>()

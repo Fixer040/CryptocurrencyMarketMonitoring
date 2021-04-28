@@ -9,6 +9,8 @@
 @using System.Collections.Generic;
 @using Microsoft.Extensions.DependencyInjection;
 @using CryptocurrencyMarketMonitoring.Client.Services;
+@using Syncfusion.Blazor.Spinner;
+
 
 @implements IAsyncDisposable
 
@@ -18,88 +20,119 @@
 
 
 <div class="px-4 text-center justify-content-center w-75 m-auto">
-    <h1>Cryptocurrency Prices by Market Cap</h1>
 
-    <div class="d-flex justify-content-start">
-        <SfComboBox TValue="string" TItem="string" DataSource="@SupportedCurrencies" Value="@SelectedCurrency" ValueChanged="@SelectedCurrencyChanged" Placeholder="USD" CssClass="w-25 justify-content-start"></SfComboBox>
-    </div>
-    <SfGrid DataSource="@Cryptocurrencies" AllowSorting="true" AllowPaging="true">
-        <GridPageSettings PageSize="100"></GridPageSettings>
-        <GridSortSettings>
-            <GridSortColumns>
-                <GridSortColumn Field="@nameof(OverviewDto.MarketCapRank)" Direction="SortDirection.Ascending"></GridSortColumn>
-            </GridSortColumns>
-        </GridSortSettings>
-        <GridColumns>
-            <GridColumn Field="@nameof(OverviewDto.MarketCapRank)" HeaderText="Ranking" TextAlign="TextAlign.Center" />
-            <GridColumn HeaderText="" TextAlign="TextAlign.Center" Width="45" AllowSorting="false">
-                <Template>
-                    @{
-                        var employee = (context as OverviewDto);
-                        <div class="image">
-                            <img width="30" height="30" src="@employee.Image" />
-                        </div>
-                    }
-                </Template>
-            </GridColumn>
-            <GridColumn Field="@nameof(OverviewDto.Name)" HeaderText="Name" TextAlign="TextAlign.Center" />
-            <GridColumn Field="@nameof(OverviewDto.Symbol)" HeaderText="Symbol" TextAlign="TextAlign.Center">
-                <Template>
-                    @{
-                        var ticker = ((OverviewDto)context).Symbol;
-                        var link = $"/detail/{ticker}";
-                        <div>
-                            <NavLink href="@link">@ticker</NavLink>
-                        </div>
-                    }
-                </Template>
-            </GridColumn>
-            <GridColumn Field="@nameof(OverviewDto.CurrentPrice)" HeaderText="Price" TextAlign="TextAlign.Center">
-                <Template>
-                    @{
-                        var dto = (OverviewDto)context;
-                        var priceString = dto.CurrentPrice < 1 ? dto.CurrentPrice.ToString($"{ActiveCurrency} ###,###,##0.0000000000") : dto.CurrentPrice.ToString($"{ActiveCurrency} ###,###,##0.00");
+    @{
+        if (_loading)
+        {
+            <SfSpinner @bind-Visible="@_loading" Label="Data is loading..."></SfSpinner>
+        }
+        else
+        {
+            <h1>Cryptocurrency Prices by Market Cap</h1>
 
-                        <div>@priceString</div>
-                    }
-                </Template>
-            </GridColumn>
-            <GridColumn Field="@nameof(OverviewDto.PriceChangePercentage24HInCurrency)" HeaderText="24h" TextAlign="TextAlign.Center">
-                <Template>
-                    @{
-                        <div class="@(((OverviewDto)context).PriceChangePercentage24HInCurrency < 0 ? "text-danger" : "text-success")">
-                            @(((OverviewDto)context).PriceChangePercentage24HInCurrency.ToString("0.00%"))
-                        </div>
-                    }
-                </Template>
-            </GridColumn>
-            <GridColumn Field="@nameof(OverviewDto.PriceChangePercentage7DInCurrency)" HeaderText="7d" TextAlign="TextAlign.Center">
-                <Template>
-                    @{
-                        <div class="@(((OverviewDto)context).PriceChangePercentage7DInCurrency < 0 ? "text-danger" : "text-success")">
-                            @(((OverviewDto)context).PriceChangePercentage7DInCurrency.ToString("0.00%"))
-                        </div>
-                    }
-                </Template>
-            </GridColumn>
-            <GridColumn Field="@nameof(OverviewDto.TotalVolume)" HeaderText="Volume" TextAlign="TextAlign.Center">
-                <Template>
-                    @{
-                        var dto = (OverviewDto)context;
-                        <div>@dto.TotalVolume.ToString($"{ActiveCurrency} ###,###,###,###,###,###")</div>
-                    }
-                </Template>
-            </GridColumn>
-            <GridColumn Field="@nameof(OverviewDto.MarketCap)" HeaderText="Market cap" TextAlign="TextAlign.Center">
-                <Template>
-                    @{
-                        var dto = (OverviewDto)context;
-                        <div>@dto.MarketCap.ToString($"{ActiveCurrency} ###,###,###,###,###,###")</div>
-                    }
-                </Template>
-            </GridColumn>
-        </GridColumns>
-    </SfGrid>
+            <div class="d-flex justify-content-start">
+                <SfComboBox TValue="string" TItem="string" DataSource="@SupportedCurrencies" Value="@SelectedCurrency" ValueChanged="@SelectedCurrencyChanged" Placeholder="USD" CssClass="w-25 justify-content-start"></SfComboBox>
+            </div>
+            <SfGrid DataSource="@Cryptocurrencies" AllowSorting="true" AllowPaging="true">
+                <GridPageSettings PageSize="20"></GridPageSettings>
+                <GridSortSettings>
+                    <GridSortColumns>
+                        <GridSortColumn Field="@nameof(OverviewDto.MarketCapRank)" Direction="SortDirection.Ascending"></GridSortColumn>
+                    </GridSortColumns>
+                </GridSortSettings>
+                <GridColumns>
+                    <GridColumn Field="@nameof(OverviewDto.MarketCapRank)" HeaderText="Ranking" TextAlign="TextAlign.Center" />
+                    <GridColumn HeaderText="" TextAlign="TextAlign.Center" Width="45" AllowSorting="false">
+                        <Template>
+                            @{
+                                var overview = (context as OverviewDto);
+                                <div class="image">
+                                    <img width="30" height="30" src="@overview.Image" />
+                                </div>
+                            }
+                        </Template>
+                    </GridColumn>
+                    <GridColumn Field="@nameof(OverviewDto.Name)" HeaderText="Name" TextAlign="TextAlign.Center" />
+                    <GridColumn Field="@nameof(OverviewDto.Symbol)" HeaderText="Symbol" TextAlign="TextAlign.Center">
+                        <Template>
+                            @{
+                                var symbol = ((OverviewDto)context).Symbol;
+                                var fullName = ((OverviewDto)context).Name;
+                                var link = $"/detail/{fullName}/{symbol}";
+                                <div>
+                                    <NavLink href="@link">@symbol</NavLink>
+                                </div>
+                            }
+                        </Template>
+                    </GridColumn>
+                    <GridColumn Field="@nameof(OverviewDto.CurrentPrice)" HeaderText="Price" TextAlign="TextAlign.Center">
+                        <Template>
+                            @{
+                                var dto = (OverviewDto)context;
+                                var priceString = dto.CurrentPrice < 1 ? dto.CurrentPrice.ToString($"{ActiveCurrency} ###,###,##0.0000000000") : dto.CurrentPrice.ToString($"{ActiveCurrency} ###,###,##0.00");
+
+                                <div>@priceString</div>
+                            }
+                        </Template>
+                    </GridColumn>
+                    <GridColumn Field="@nameof(OverviewDto.PriceChangePercentage24HInCurrency)" HeaderText="24h" TextAlign="TextAlign.Center">
+                        <Template>
+                            @{
+                                <div class="@(((OverviewDto)context).PriceChangePercentage24HInCurrency < 0 ? "text-danger" : "text-success")">
+                                    @(((OverviewDto)context).PriceChangePercentage24HInCurrency.ToString("0.00%"))
+                                </div>
+                            }
+                        </Template>
+                    </GridColumn>
+                    <GridColumn Field="@nameof(OverviewDto.PriceChangePercentage7DInCurrency)" HeaderText="7d" TextAlign="TextAlign.Center">
+                        <Template>
+                            @{
+                                <div class="@(((OverviewDto)context).PriceChangePercentage7DInCurrency < 0 ? "text-danger" : "text-success")">
+                                    @(((OverviewDto)context).PriceChangePercentage7DInCurrency.ToString("0.00%"))
+                                </div>
+                            }
+                        </Template>
+                    </GridColumn>
+                    <GridColumn Field="@nameof(OverviewDto.TotalVolume)" HeaderText="Volume" TextAlign="TextAlign.Center">
+                        <Template>
+                            @{
+                                var dto = (OverviewDto)context;
+                                <div>@dto.TotalVolume.ToString($"{ActiveCurrency} ###,###,###,###,###,###")</div>
+                            }
+                        </Template>
+                    </GridColumn>
+                    <GridColumn Field="@nameof(OverviewDto.MarketCap)" HeaderText="Market cap" TextAlign="TextAlign.Center">
+                        <Template>
+                            @{
+                                var dto = (OverviewDto)context;
+                                <div>@dto.MarketCap.ToString($"{ActiveCurrency} ###,###,###,###,###,###")</div>
+                            }
+                        </Template>
+                    </GridColumn>
+                    <GridColumn HeaderText="Sparkline" TextAlign="TextAlign.Center">
+                        <Template>
+                            @{
+                                var dto = (OverviewDto)context;
+
+                                if (!_reloadingCurrency || dto?.Sparkline?.SparklineValues != null || !dto.Sparkline.SparklineValues.Any())
+                                {
+                                    <SfSparkline ValueType="SparklineValueType.Numeric"
+                                                 XName="Id"
+                                                 YName="Value"
+                                                 TValue="SparklineValueDto"
+                                                 DataSource="dto.Sparkline.SparklineValues"
+                                                 Height="30px"
+                                                 Width="80px">
+                                    </SfSparkline>
+                                }
+                            }
+                        </Template>
+                    </GridColumn>
+                </GridColumns>
+            </SfGrid>
+        }
+    }
+
 </div>
 
 <div class="mb-4"></div>
@@ -116,7 +149,7 @@
         SupportedCurrencies = await HttpService.Get<List<string>>("Overview/currencies");
         SelectedCurrency = SupportedCurrencies.FirstOrDefault(x => x == "USD");
         ActiveCurrency = SelectedCurrency;
-        Cryptocurrencies = await HttpService.Get<List<OverviewDto>>($"Overview/overview/{SelectedCurrency}");
+        Cryptocurrencies = await HttpService.Get<List<OverviewDto>>($"Overview/overview-all/{SelectedCurrency}");
 
         _updateHubConnection = new HubConnectionBuilder().AddJsonProtocol(options =>
         {
@@ -133,7 +166,8 @@
 
         await _updateHubConnection.SendAsync("Subscribe", _updateHubConnection.ConnectionId, SelectedCurrency);
 
-
+        _loading = false;
+        StateHasChanged();
         await base.OnInitializedAsync();
     }
 
@@ -195,11 +229,19 @@
 
     private async Task ReloadGridCurrencyAsync(string newCurrency)
     {
-        Cryptocurrencies = await HttpService.Get<List<OverviewDto>>($"Overview/overview/{newCurrency ?? "USD"}");
+        _reloadingCurrency = true;
+        StateHasChanged();
+
+        Cryptocurrencies = await HttpService.Get<List<OverviewDto>>($"Overview/overview-all/{newCurrency ?? "USD"}");
         await _updateHubConnection.SendAsync("Subscribe", _updateHubConnection.ConnectionId, SelectedCurrency);
         StateHasChanged();
         ActiveCurrency = SelectedCurrency;
+
+        _reloadingCurrency = false;
+        StateHasChanged();
     }
 
     private HubConnection _updateHubConnection;
+    private bool _loading = true;
+    private bool _reloadingCurrency = false;
 }

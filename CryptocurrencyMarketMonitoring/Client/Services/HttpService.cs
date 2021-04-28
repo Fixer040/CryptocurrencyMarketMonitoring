@@ -101,6 +101,9 @@ namespace CryptocurrencyMarketMonitoring.Client.Services
                 throw new Exception(error.Message);
             }
 
+            if (response.StatusCode == HttpStatusCode.NoContent)
+                return default;
+
             return await response.Content.ReadFromJsonAsync<T>();
         }
 

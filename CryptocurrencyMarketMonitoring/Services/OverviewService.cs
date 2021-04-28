@@ -21,9 +21,14 @@ namespace CryptocurrencyMarketMonitoring.Services
             return _cryptocurrencyOverviewManager.GetSupportedCurrencies();
         }
 
-        public IEnumerable<OverviewDto> GetOverview(string currency)
+        public IEnumerable<OverviewDto> GetOverviewAll(string currency)
         {
-            return _cryptocurrencyOverviewManager.GetOverview(currency);
+            return _cryptocurrencyOverviewManager.GetOverviewAll(currency);
+        }
+
+        public OverviewDto GetOverview(string currency, string vsCurrency)
+        {
+            return _cryptocurrencyOverviewManager.GetOverview(currency, vsCurrency);
         }
 
         IOverviewManager _cryptocurrencyOverviewManager;

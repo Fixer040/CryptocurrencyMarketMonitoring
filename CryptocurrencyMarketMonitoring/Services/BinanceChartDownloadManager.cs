@@ -151,7 +151,7 @@ namespace CryptocurrencyMarketMonitoring.Services
         private IEnumerable<string> _supportedVsCurrencies;
         private int _downloadCyclePeriod = 60000;
         private readonly string[] _allowedCurrencies = { "BTC", "ETH" };
-        private readonly string[] _allowedVsCurrencies = { "USD" };
+        private readonly string[] _allowedVsCurrencies = { "USD", "EUR" };
         private readonly IntervalType[] _allowedIntervalTypes = { IntervalType.one_hour, IntervalType.two_hours, IntervalType.four_hours, IntervalType.twelve_hours, IntervalType.one_day, IntervalType.one_month };
         private ConcurrentDictionary<string, BinanceLastDownloadedPair> _lastDownloadedStamps = new();
 

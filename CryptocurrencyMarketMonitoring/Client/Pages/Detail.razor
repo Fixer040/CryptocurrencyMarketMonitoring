@@ -1,4 +1,4 @@
-﻿@page "/detail/{Currency}"
+﻿@page "/detail/{CurrencyFullName}/{Currency}"
 
 @using Syncfusion.Blazor.Charts;
 @using CryptocurrencyMarketMonitoring.Shared
@@ -6,67 +6,174 @@
 @using System.Collections.Generic;
 @using Syncfusion.Blazor.Data
 @using Syncfusion.Blazor.Layouts
+@using Syncfusion.Blazor.SplitButtons;
+@using Syncfusion.Blazor.DropDowns;
+@using Syncfusion.Blazor.Spinner;
+@using Syncfusion.Blazor.Buttons;
+@using Services; 
+@using IntervalType = CryptocurrencyMarketMonitoring.Shared.IntervalType;
+
+@inject IHttpService HttpService
 
 
+<div class="px-4 py-5 text-center justify-content-center w-75 m-auto">
+    <div class="d-flex justify-content-start align-items-center pb-5">
+        @if (!_initialLoading)
+        {
+            <img height="50" width="50" src="@_currencyOverview?.Image" />
+        }
+        <h2 class="mr-md-3 mx-2 mb-md-0 text-3xl font-semibold">@($"{CurrencyFullName} ({Currency})")</h2>
+    </div>
+    <div class="d-flex justify-content-start">
+        <div class="w-50 d-flex justify-content-start">
+            @if (!_initialLoading)
+            {
+                <SfComboBox TValue="string" TItem="string" DataSource="@_intervalSelectors.Keys" Value="@_selectedIntervalKey" ValueChanged="@SelectedIntervalChanged" Placeholder="1h" CssClass="w-25"></SfComboBox>
+                <SfComboBox TValue="string" TItem="string" DataSource="@SupportedVsCurrencies" Value="@VsCurrency" ValueChanged="@SelectedVsCurrencyChanged" Placeholder="USD" CssClass="w-25"></SfComboBox>
+            }
+        </div>
 
-@inject HttpClient Http
+    </div>
+    <div class="w-100">
+        @{
+            if (!_chartReloading && string.IsNullOrEmpty(_error))
+            {
+                <SfStockChart Title="Market data provided by Binance">
+                    <StockChartTooltipSettings Enable="true"></StockChartTooltipSettings>
+                    <StockChartCrosshairSettings Enable="true"></StockChartCrosshairSettings>
+                    <StockChartSeriesCollection>
+                        <StockChartSeries DataSource="@ChartData" Type="ChartSeriesType.Candle"
+                                          XName="@nameof(ChartDataDto.Date)"
+                                          YName="@nameof(ChartDataDto.Close)"
+                                          High="@nameof(ChartDataDto.High)"
+                                          Low="@nameof(ChartDataDto.Low)"
+                                          Open="@nameof(ChartDataDto.Open)"
+                                          Close="@nameof(ChartDataDto.Close)"
+                                          Volume="@nameof(ChartDataDto.Volume)">
+                        </StockChartSeries>
+                    </StockChartSeriesCollection>
+                </SfStockChart>
+            }
+            else if (string.IsNullOrEmpty(_error))
+            {
+                <SfSpinner @bind-Visible="@_chartReloading" Label="Chart data is loading..."></SfSpinner>
+            }
+            else
+            {
+                <div class="lert alert-danger mt-3 mb-0">@_error</div>
+            }
+        }
 
+    </div>
 
-<div class="px-4 text-center justify-content-center w-75 m-auto">
-    <SfDashboardLayout Columns="6" CellSpacing="@(new double[]{10 ,10 })">
-        <DashboardLayoutPanels>
-            <DashboardLayoutPanel Id="Panel1" SizeX=6 SizeY=2 Column=1 Row=1>
-                <HeaderTemplate><div class='header'> Trading view data by Binance</div></HeaderTemplate>
-                <ContentTemplate>
-                    <div class="w-100">
-                        <SfStockChart>
-                            <StockChartTooltipSettings Enable="true"></StockChartTooltipSettings>
-                            <StockChartCrosshairSettings Enable="true"></StockChartCrosshairSettings>
-                            <StockChartSeriesCollection>
-                                <StockChartSeries DataSource="@ChartData" Type="ChartSeriesType.Candle"
-                                                  XName="@nameof(ChartDataDto.Date)"
-                                                  YName="@nameof(ChartDataDto.Close)"
-                                                  High="@nameof(ChartDataDto.High)"
-                                                  Low="@nameof(ChartDataDto.Low)"
-                                                  Open="@nameof(ChartDataDto.Open)"
-                                                  Close="@nameof(ChartDataDto.Close)"
-                                                  Volume="@nameof(ChartDataDto.Volume)">
-                                </StockChartSeries>
-                            </StockChartSeriesCollection>
-                        </SfStockChart>
-                    </div>
-                </ContentTemplate>
-            </DashboardLayoutPanel>
-        </DashboardLayoutPanels>
-    </SfDashboardLayout>
 </div>
 
 
-@code {
-    [Parameter]
-    public string Currency { get; set; }
-    public string VsCurrency { get; set; } = "USD";
-    public CryptocurrencyMarketMonitoring.Shared.IntervalType IntervalType { get; set; } = CryptocurrencyMarketMonitoring.Shared.IntervalType.one_hour;
+    @code {
+        [Parameter]
+        public string CurrencyFullName { get; set; }
+        [Parameter]
+        public string Currency { get; set; }
+        public string VsCurrency { get; set; } = "USD";
+        public List<string> SupportedVsCurrencies { get; set; }
+        public IntervalType Interval { get; set; } = IntervalType.one_hour;
 
-    public List<ChartDataDto> ChartData { get; set; }
+        public List<ChartDataDto> ChartData { get; set; }
 
-    protected override async Task OnInitializedAsync()
+        protected override async Task OnInitializedAsync()
+        {
+            _error = null;
+            _chartReloading = true;
+            _initialLoading = true;
+            var cryptocurrencyList = await HttpService.Get<IEnumerable<ChartDataDto>>($"ChartData/{Currency}/{VsCurrency}/{Interval}");
+
+            var supportedVsCurrencies = await HttpService.Get<IEnumerable<string>>($"Overview/currencies");
+
+            _currencyOverview = await HttpService.Get<OverviewDto>($"Overview/overview/{CurrencyFullName}/{VsCurrency}");
+
+            SupportedVsCurrencies = supportedVsCurrencies?.Where(x => x != Currency)?.ToList();
+
+            ChartData = cryptocurrencyList?.ToList();
+
+            if (ChartData == null || !ChartData.Any())
+                _error = "No data available for this currency";
+
+            _chartReloading = false;
+            _initialLoading = false;
+
+            StateHasChanged();
+
+            await base.OnInitializedAsync();
+        }
+
+
+        public async Task UpdateChartAsync()
+        {
+            var cryptocurrencyList = await HttpService.Get<IEnumerable<ChartDataDto>>($"ChartData/{Currency}/{VsCurrency}/{Interval}");
+
+            ChartData = cryptocurrencyList?.ToList();
+
+            if (ChartData == null || !ChartData.Any())
+                _error = "No data available for this currency";
+
+            _chartReloading = false;
+            StateHasChanged();
+
+        }
+
+        public void SelectedVsCurrencyChanged(string value)
+        {
+            _error = null;
+            _chartReloading = true;
+            StateHasChanged();
+            VsCurrency = value ?? "USD";
+
+            _ = UpdateChartAsync();
+        }
+
+        public void SelectedIntervalChanged(string value)
+        {
+            _error = null;
+            _chartReloading = true;
+            StateHasChanged();
+
+            if (string.IsNullOrEmpty(value))
+                value = "1h";
+
+            _selectedIntervalKey = value;
+
+            Interval = _intervalSelectors[value];
+
+            _ = UpdateChartAsync();
+        }
+
+
+
+        private bool _chartReloading;
+        private bool _initialLoading;
+        private string _error;
+        private OverviewDto _currencyOverview;
+        private string _selectedIntervalKey = "1h";
+        private readonly Dictionary<string, IntervalType> _intervalSelectors = new Dictionary<string, IntervalType>()
     {
-        var cryptocurrencyList = await Http.GetFromJsonAsync<ChartDataDto[]>($"ChartData/{Currency}/{VsCurrency}/{IntervalType}");
+        { "1m", IntervalType.one_minute },
+        { "3m", IntervalType.three_minutes },
+        { "5m", IntervalType.five_minutes },
+        { "15m", IntervalType.fifteen_minutes },
+        { "30m", IntervalType.thirty_minutes },
+        { "1h", IntervalType.one_hour },
+        { "2h", IntervalType.two_hours },
+        { "4h", IntervalType.four_hours },
+        { "6h", IntervalType.six_hours },
+        { "8h", IntervalType.eight_hours },
+        { "12h", IntervalType.twelve_hours },
+        { "1D", IntervalType.one_day },
+        { "3D", IntervalType.three_days },
+        { "1W", IntervalType.one_week },
+        { "1M", IntervalType.one_month },
 
-        ChartData = cryptocurrencyList.ToList();
+    };
 
-        StateHasChanged();
-        base.OnInitialized();
+
+
     }
-
-
-    public async Task UpdateGrid(int intervalType)
-    {
-        var cryptocurrencyList = await Http.GetFromJsonAsync<ChartDataDto[]>($"ChartData/{Currency}/{VsCurrency}/{IntervalType}");
-
-        ChartData = cryptocurrencyList.ToList();        // Here you can customize your code
-        StateHasChanged();
-    }
-
-}
