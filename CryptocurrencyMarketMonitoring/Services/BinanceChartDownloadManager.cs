@@ -140,7 +140,6 @@ namespace CryptocurrencyMarketMonitoring.Services
                     }
                 }
             }
-
         }
 
         private readonly IBinanceClient _binanceClient;

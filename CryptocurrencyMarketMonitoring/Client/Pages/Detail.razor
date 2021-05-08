@@ -24,8 +24,36 @@
         }
         <h2 class="mr-md-3 mx-2 mb-md-0 text-3xl font-semibold">@($"{CurrencyFullName} ({Currency})")</h2>
     </div>
+    @if (!_initialLoading)
+    {
+        <div class="d-flex justify-content-end align-items-center container mr-0">
+            <div class="row">
+                <div class="col font-weight-bold">Rank</div>
+                <div class="col font-weight-bold">Price</div>
+                <div class="col font-weight-bold">24h</div>
+                <div class="col font-weight-bold">7d</div>
+                <div class="col font-weight-bold">Volume</div>
+                <div class="col font-weight-bold">Market Cap</div>
+                <div class="w-100"></div>
+                <div class="col">@_currencyOverview.MarketCapRank</div>
+                <div class="col">
+                    @{
+                        var priceString = _currencyOverview.CurrentPrice < 1 ? _currencyOverview.CurrentPrice.ToString($"{VsCurrency} ###,###,##0.0000") : _currencyOverview.CurrentPrice.ToString($"{VsCurrency} ###,###,##0.00");
+                        priceString = _currencyOverview.CurrentPrice < (decimal)0.0001 ? _currencyOverview.CurrentPrice.ToString($"{VsCurrency} ###,###,##0.00000000") : priceString;
+
+                        <div>@priceString</div>
+                    }
+                </div>
+                <div class="col">@_currencyOverview.PriceChangePercentage24HInCurrency</div>
+                <div class="col">@_currencyOverview.PriceChangePercentage7DInCurrency</div>
+                <div class="col">@_currencyOverview.TotalVolume</div>
+                <div class="col">@_currencyOverview.MarketCap</div>
+            </div>
+        </div>
+
+    }
     <div class="d-flex justify-content-start">
-        <div class="w-50 d-flex justify-content-start">
+        <div class="w-25 d-flex justify-content-start">
             @if (!_initialLoading)
             {
                 <SfComboBox TValue="string" TItem="string" DataSource="@_intervalSelectors.Keys" Value="@_selectedIntervalKey" ValueChanged="@SelectedIntervalChanged" Placeholder="1h" CssClass="w-25"></SfComboBox>
@@ -38,7 +66,7 @@
         @{
             if (!_chartReloading && string.IsNullOrEmpty(_error))
             {
-                <SfStockChart Title="Market data provided by Binance">
+                <SfStockChart Title="Market data provided by Binance" Theme="ChartTheme.Material">
                     <StockChartTooltipSettings Enable="true"></StockChartTooltipSettings>
                     <StockChartCrosshairSettings Enable="true"></StockChartCrosshairSettings>
                     <StockChartSeriesCollection>

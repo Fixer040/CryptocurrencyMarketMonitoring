@@ -30,7 +30,7 @@
         {
             <h1>Cryptocurrency Prices by Market Cap</h1>
 
-            <div class="d-flex justify-content-start">
+            <div class="d-flex justify-content-start w-25">
                 <SfComboBox TValue="string" TItem="string" DataSource="@SupportedCurrencies" Value="@SelectedCurrency" ValueChanged="@SelectedCurrencyChanged" Placeholder="USD" CssClass="w-25 justify-content-start"></SfComboBox>
             </div>
             <SfGrid DataSource="@Cryptocurrencies" AllowSorting="true" AllowPaging="true">
@@ -41,7 +41,7 @@
                     </GridSortColumns>
                 </GridSortSettings>
                 <GridColumns>
-                    <GridColumn Field="@nameof(OverviewDto.MarketCapRank)" HeaderText="Ranking" TextAlign="TextAlign.Center" />
+                    <GridColumn Field="@nameof(OverviewDto.MarketCapRank)"  Width="90" HeaderText="Rank" TextAlign="TextAlign.Center" />
                     <GridColumn HeaderText="" TextAlign="TextAlign.Center" Width="45" AllowSorting="false">
                         <Template>
                             @{
@@ -53,7 +53,7 @@
                         </Template>
                     </GridColumn>
                     <GridColumn Field="@nameof(OverviewDto.Name)" HeaderText="Name" TextAlign="TextAlign.Center" />
-                    <GridColumn Field="@nameof(OverviewDto.Symbol)" HeaderText="Symbol" TextAlign="TextAlign.Center">
+                    <GridColumn Field="@nameof(OverviewDto.Symbol)" HeaderText="Symbol" MaxWidth="30" TextAlign="TextAlign.Center">
                         <Template>
                             @{
                                 var symbol = ((OverviewDto)context).Symbol;
@@ -69,13 +69,14 @@
                         <Template>
                             @{
                                 var dto = (OverviewDto)context;
-                                var priceString = dto.CurrentPrice < 1 ? dto.CurrentPrice.ToString($"{ActiveCurrency} ###,###,##0.0000000000") : dto.CurrentPrice.ToString($"{ActiveCurrency} ###,###,##0.00");
+                                var priceString = dto.CurrentPrice < 1 ? dto.CurrentPrice.ToString($"{ActiveCurrency} ###,###,##0.0000") : dto.CurrentPrice.ToString($"{ActiveCurrency} ###,###,##0.00");
+                                priceString = dto.CurrentPrice < (decimal)0.0001 ? dto.CurrentPrice.ToString($"{ActiveCurrency} ###,###,##0.00000000") : priceString;
 
                                 <div>@priceString</div>
                             }
                         </Template>
                     </GridColumn>
-                    <GridColumn Field="@nameof(OverviewDto.PriceChangePercentage24HInCurrency)" HeaderText="24h" TextAlign="TextAlign.Center">
+                    <GridColumn Field="@nameof(OverviewDto.PriceChangePercentage24HInCurrency)" Width="75" HeaderText="24h" TextAlign="TextAlign.Center">
                         <Template>
                             @{
                                 <div class="@(((OverviewDto)context).PriceChangePercentage24HInCurrency < 0 ? "text-danger" : "text-success")">
@@ -84,7 +85,7 @@
                             }
                         </Template>
                     </GridColumn>
-                    <GridColumn Field="@nameof(OverviewDto.PriceChangePercentage7DInCurrency)" HeaderText="7d" TextAlign="TextAlign.Center">
+                    <GridColumn Field="@nameof(OverviewDto.PriceChangePercentage7DInCurrency)" Width="70" HeaderText="7d" TextAlign="TextAlign.Center">
                         <Template>
                             @{
                                 <div class="@(((OverviewDto)context).PriceChangePercentage7DInCurrency < 0 ? "text-danger" : "text-success")">
@@ -113,18 +114,18 @@
                         <Template>
                             @{
                                 var dto = (OverviewDto)context;
-
-                                if (!_reloadingCurrency || dto?.Sparkline?.SparklineValues != null || !dto.Sparkline.SparklineValues.Any())
-                                {
-                                    <SfSparkline ValueType="SparklineValueType.Numeric"
-                                                 XName="Id"
-                                                 YName="Value"
-                                                 TValue="SparklineValueDto"
-                                                 DataSource="dto.Sparkline.SparklineValues"
-                                                 Height="30px"
-                                                 Width="80px">
-                                    </SfSparkline>
-                                }
+                                var firstPoint = dto.Sparkline.SparklineValues.First().Value;
+                                var lastPoint = dto.Sparkline.SparklineValues.Last().Value;
+                                var color = firstPoint < lastPoint ? "#008000" : "#B22222";
+                                <SfSparkline ValueType="SparklineValueType.Numeric"
+                                             XName="Id"
+                                             YName="Value"
+                                             TValue="SparklineValueDto"
+                                             DataSource="dto.Sparkline.SparklineValues"
+                                             Height="30px"
+                                             Width="80px"
+                                             Fill="@color">
+                                </SfSparkline>
                             }
                         </Template>
                     </GridColumn>
@@ -230,11 +231,9 @@
     private async Task ReloadGridCurrencyAsync(string newCurrency)
     {
         _reloadingCurrency = true;
-        StateHasChanged();
 
         Cryptocurrencies = await HttpService.Get<List<OverviewDto>>($"Overview/overview-all/{newCurrency ?? "USD"}");
         await _updateHubConnection.SendAsync("Subscribe", _updateHubConnection.ConnectionId, SelectedCurrency);
-        StateHasChanged();
         ActiveCurrency = SelectedCurrency;
 
         _reloadingCurrency = false;
